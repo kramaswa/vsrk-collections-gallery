@@ -7,19 +7,32 @@ import UploadForm from '@/components/admin/UploadForm';
 import MediaManager from '@/components/admin/MediaManager';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { LogOut } from 'lucide-react';
+import { LogOut, Loader2 } from 'lucide-react';
 
 const Admin: React.FC = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, loading, user } = useAuth();
   const { toast } = useToast();
   
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     toast({
       title: "Logged out",
       description: "You have been logged out successfully",
     });
   };
+  
+  if (loading) {
+    return (
+      <Layout hideFooter={true}>
+        <div className="container mx-auto px-4 py-16 flex justify-center items-center h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto text-vsrk-gold" />
+            <p className="mt-4 text-lg text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
   
   return (
     <Layout hideFooter={!isAuthenticated}>
@@ -27,7 +40,10 @@ const Admin: React.FC = () => {
         {isAuthenticated ? (
           <>
             <div className="flex justify-between items-center mb-8">
-              <h1 className="font-serif text-4xl font-medium">Admin Dashboard</h1>
+              <div>
+                <h1 className="font-serif text-4xl font-medium">Admin Dashboard</h1>
+                <p className="text-gray-600 mt-2">Welcome, {user?.email}</p>
+              </div>
               <Button 
                 variant="outline"
                 onClick={handleLogout}

@@ -6,39 +6,55 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
 import { 
   Trash2, 
-  Star, 
   Search,
   Image as ImageIcon, 
   Video as VideoIcon,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Loader2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { format } from 'date-fns';
 
-type SortField = 'title' | 'type';
+type SortField = 'title' | 'type' | 'created_at';
 type SortOrder = 'asc' | 'desc';
 
 const MediaManager: React.FC = () => {
-  const { mediaItems, deleteMediaItem, toggleFeatured } = useMedia();
+  const { mediaItems, deleteMediaItem, toggleFeatured, isLoading } = useMedia();
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState<SortField>('title');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
   
-  const handleDelete = (id: string) => {
-    deleteMediaItem(id);
-    toast({
-      title: "Deleted",
-      description: "Media item has been deleted",
-    });
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    const success = await deleteMediaItem(id);
+    if (success) {
+      setItemToDelete(null);
+    }
+    setDeletingId(null);
   };
   
-  const handleToggleFeatured = (id: string, currentState: boolean) => {
-    toggleFeatured(id);
-    toast({
-      title: currentState ? "Removed from featured" : "Added to featured",
-      description: `Item has been ${currentState ? "removed from" : "added to"} featured items`,
-    });
+  const handleToggleFeatured = async (id: string, currentState: boolean) => {
+    const success = await toggleFeatured(id);
+    if (success) {
+      toast({
+        title: currentState ? "Removed from featured" : "Added to featured",
+        description: `Item has been ${currentState ? "removed from" : "added to"} featured items`,
+      });
+    }
   };
   
   const toggleSort = (field: SortField) => {
@@ -64,6 +80,10 @@ const MediaManager: React.FC = () => {
       return sortOrder === 'asc'
         ? a.type.localeCompare(b.type)
         : b.type.localeCompare(a.type);
+    } else if (sortField === 'created_at') {
+      return sortOrder === 'asc'
+        ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        : new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     }
     return 0;
   });
@@ -107,12 +127,30 @@ const MediaManager: React.FC = () => {
               sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
             )}
           </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => toggleSort('created_at')}
+            className="flex items-center"
+          >
+            Date
+            {sortField === 'created_at' && (
+              sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
+            )}
+          </Button>
         </div>
       </div>
       
-      {sortedItems.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 text-vsrk-gold animate-spin" />
+          <span className="ml-2 text-lg text-gray-600">Loading...</span>
+        </div>
+      ) : sortedItems.length === 0 ? (
         <div className="text-center py-8 border border-dashed rounded-md">
-          <p className="text-gray-500">No media items found</p>
+          <p className="text-gray-500">
+            {searchTerm ? "No media items match your search" : "No media items found"}
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -120,35 +158,64 @@ const MediaManager: React.FC = () => {
             <MediaListItem
               key={item.id}
               item={item}
-              onDelete={handleDelete}
-              onToggleFeatured={handleToggleFeatured}
+              onDelete={() => setItemToDelete(item.id)}
+              onToggleFeatured={() => handleToggleFeatured(item.id, item.featured)}
+              isDeleting={deletingId === item.id}
             />
           ))}
         </div>
       )}
+      
+      <AlertDialog open={!!itemToDelete} onOpenChange={() => setItemToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this item?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the media item from your collection.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => itemToDelete && handleDelete(itemToDelete)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
 
 interface MediaListItemProps {
   item: MediaItem;
-  onDelete: (id: string) => void;
-  onToggleFeatured: (id: string, currentState: boolean) => void;
+  onDelete: () => void;
+  onToggleFeatured: () => void;
+  isDeleting: boolean;
 }
 
-const MediaListItem: React.FC<MediaListItemProps> = ({ item, onDelete, onToggleFeatured }) => {
+const MediaListItem: React.FC<MediaListItemProps> = ({ 
+  item, 
+  onDelete,
+  onToggleFeatured,
+  isDeleting 
+}) => {
+  const formattedDate = format(new Date(item.created_at), 'MMM d, yyyy');
+  
   return (
     <div className="flex gap-4 p-3 border rounded-md hover:bg-gray-50">
       <div className="w-16 h-16 rounded overflow-hidden flex-shrink-0">
         {item.type === 'image' ? (
           <img 
-            src={item.url} 
+            src={item.media_url} 
             alt={item.title} 
             className="w-full h-full object-cover"
           />
         ) : (
           <img 
-            src={item.thumbnail || item.url} 
+            src={item.thumbnail_url || item.media_url} 
             alt={item.title} 
             className="w-full h-full object-cover"
           />
@@ -163,6 +230,7 @@ const MediaListItem: React.FC<MediaListItemProps> = ({ item, onDelete, onToggleF
             <VideoIcon className="h-4 w-4 text-gray-400" />
           )}
           <h3 className="font-medium truncate">{item.title}</h3>
+          <span className="text-xs text-gray-500">({formattedDate})</span>
         </div>
         <p className="text-sm text-gray-500 line-clamp-1">{item.description}</p>
       </div>
@@ -172,7 +240,7 @@ const MediaListItem: React.FC<MediaListItemProps> = ({ item, onDelete, onToggleF
           <Checkbox
             id={`featured-${item.id}`}
             checked={item.featured}
-            onCheckedChange={() => onToggleFeatured(item.id, item.featured)}
+            onCheckedChange={onToggleFeatured}
             className="text-vsrk-gold"
           />
           <label htmlFor={`featured-${item.id}`} className="text-xs">Featured</label>
@@ -180,10 +248,15 @@ const MediaListItem: React.FC<MediaListItemProps> = ({ item, onDelete, onToggleF
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onDelete(item.id)}
+          onClick={onDelete}
           className="text-red-600 h-8 w-8 p-0"
+          disabled={isDeleting}
         >
-          <Trash2 className="h-4 w-4" />
+          {isDeleting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
         </Button>
       </div>
     </div>

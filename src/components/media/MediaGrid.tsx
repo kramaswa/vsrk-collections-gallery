@@ -1,23 +1,39 @@
 
 import React from 'react';
 import MediaCard from './MediaCard';
-import { useMedia, MediaItem } from '@/contexts/MediaContext';
+import { useMedia } from '@/contexts/MediaContext';
+import { MediaItem } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface MediaGridProps {
   items?: MediaItem[];
   featuredOnly?: boolean;
+  searchQuery?: string;
+  viewMode?: 'grid' | 'list';
 }
 
-const MediaGrid: React.FC<MediaGridProps> = ({ items, featuredOnly = false }) => {
+const MediaGrid: React.FC<MediaGridProps> = ({ 
+  items, 
+  featuredOnly = false, 
+  searchQuery = '',
+  viewMode = 'grid'
+}) => {
   const { mediaItems, featuredItems, isLoading } = useMedia();
   
   // Determine which items to display
-  const displayItems = items || (featuredOnly ? featuredItems : mediaItems);
+  let displayItems = items || (featuredOnly ? featuredItems : mediaItems);
+  
+  // Apply search filter if provided
+  if (searchQuery) {
+    displayItems = displayItems.filter(item => 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
   
   if (isLoading) {
     return (
-      <div className="gallery-grid">
+      <div className={viewMode === 'grid' ? "gallery-grid" : "space-y-4"}>
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="space-y-3">
             <Skeleton className="w-full h-[300px] rounded-md" />
@@ -32,14 +48,20 @@ const MediaGrid: React.FC<MediaGridProps> = ({ items, featuredOnly = false }) =>
   if (displayItems.length === 0) {
     return (
       <div className="text-center py-12">
-        <h3 className="font-serif text-xl">No items to display</h3>
-        <p className="text-gray-500 mt-2">Check back soon for new additions to our collection.</p>
+        <h3 className="font-serif text-xl">
+          {searchQuery ? "No items match your search" : "No items to display"}
+        </h3>
+        <p className="text-gray-500 mt-2">
+          {searchQuery 
+            ? "Try changing your search terms" 
+            : "Check back soon for new additions to our collection."}
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="gallery-grid">
+    <div className={viewMode === 'grid' ? "gallery-grid" : "space-y-6"}>
       {displayItems.map((item) => (
         <MediaCard key={item.id} item={item} />
       ))}

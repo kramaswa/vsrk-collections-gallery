@@ -1,47 +1,133 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { Session, User } from '@supabase/supabase-js';
+import { useToast } from '@/components/ui/use-toast';
 
 type AuthContextType = {
   isAuthenticated: boolean;
-  login: (password: string) => boolean;
-  logout: () => void;
+  user: User | null;
+  session: Session | null;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  loading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// This is a very simple authentication system
-// In a real application, you would use a more secure method
-// such as JWT tokens or an auth provider like Firebase Auth
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const { toast } = useToast();
   
-  // Check if user is already logged in from localStorage
   useEffect(() => {
-    const token = localStorage.getItem('vsrk-admin-token');
-    if (token) {
-      setIsAuthenticated(true);
-    }
-  }, []);
+    // Check active sessions and set the user
+    setLoading(true);
+    
+    const getInitialSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error("Error retrieving session:", error);
+        toast({
+          title: "Authentication Error",
+          description: "There was an error checking your authentication status.",
+          variant: "destructive",
+        });
+      }
+      
+      setSession(data.session);
+      setUser(data.session?.user ?? null);
+      setIsAuthenticated(!!data.session);
+      setLoading(false);
+    };
+    
+    getInitialSession();
+    
+    // Listen for auth changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        console.log("Auth event:", event);
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        setIsAuthenticated(!!newSession);
+        setLoading(false);
+      }
+    );
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [toast]);
   
-  // Simple password check - in a real app, you would verify with a backend
-  // ADMIN_PASSWORD should be something secure and not hardcoded in the frontend
-  const login = (password: string): boolean => {
-    // This is a simple example - replace with a secure password
-    if (password === 'VSRK-Collections-2024') {
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        console.error("Login error:", error);
+        toast({
+          title: "Login failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      setUser(data.user);
+      setSession(data.session);
       setIsAuthenticated(true);
-      localStorage.setItem('vsrk-admin-token', 'authenticated');
       return true;
+    } catch (err) {
+      console.error("Unexpected login error:", err);
+      toast({
+        title: "Login failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setLoading(false);
     }
-    return false;
   };
   
-  const logout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('vsrk-admin-token');
+  const logout = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        toast({
+          title: "Logout failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setUser(null);
+      setSession(null);
+      setIsAuthenticated(false);
+    } catch (err) {
+      console.error("Unexpected logout error:", err);
+      toast({
+        title: "Logout failed",
+        description: "An unexpected error occurred during logout.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, session, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { MediaItem } from '@/contexts/MediaContext';
+import { MediaItem } from '@/lib/supabase';
 
 interface MediaCardProps {
   item: MediaItem;
@@ -21,17 +21,17 @@ const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
           <div className="video-container">
             {item.type === 'image' ? (
               <img 
-                src={item.url} 
+                src={item.media_url} 
                 alt={item.title}
-                className="transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-[300px] object-cover transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
               />
             ) : (
               <div className="relative">
                 <img 
-                  src={item.thumbnail || item.url} 
+                  src={item.thumbnail_url || item.media_url} 
                   alt={item.title}
-                  className="transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-[300px] object-cover transition-transform duration-300 group-hover:scale-105"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -54,13 +54,13 @@ const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
           <div className="p-2">
             {item.type === 'image' ? (
               <img 
-                src={item.url} 
+                src={item.media_url} 
                 alt={item.title} 
                 className="w-full h-auto rounded-md"
               />
             ) : (
               <video 
-                src={item.url} 
+                src={item.media_url} 
                 controls
                 className="w-full h-auto rounded-md"
                 autoPlay
