@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useMedia } from '@/contexts/MediaContext';
 import { Button } from '@/components/ui/button';
@@ -39,13 +38,13 @@ const FeaturedSlider: React.FC = () => {
         >
           {item.type === 'image' ? (
             <img
-              src={item.url}
+              src={item.media_url}
               alt={item.title}
               className="w-full h-full object-cover"
             />
           ) : (
             <video
-              src={item.url}
+              src={item.media_url}
               className="w-full h-full object-cover"
               autoPlay
               muted
