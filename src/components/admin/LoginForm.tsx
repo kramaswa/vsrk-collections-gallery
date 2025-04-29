@@ -67,16 +67,18 @@ const LoginForm: React.FC = () => {
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
+              <FormItem className="mb-4">
+                <FormLabel className="text-base font-medium">Email Address</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
-                      placeholder="Enter your email"
-                      className="pl-10"
+                      placeholder="Enter your email address"
+                      className="pl-10 h-12 text-base"
                       {...field}
                       type="email"
+                      autoComplete="email"
+                      required
                     />
                   </div>
                 </FormControl>
@@ -90,15 +92,17 @@ const LoginForm: React.FC = () => {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel className="text-base font-medium">Password</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       type="password"
                       placeholder="Enter your password"
-                      className="pl-10"
+                      className="pl-10 h-12 text-base"
                       {...field}
+                      autoComplete="current-password"
+                      required
                     />
                   </div>
                 </FormControl>
@@ -109,7 +113,7 @@ const LoginForm: React.FC = () => {
           
           <Button 
             type="submit" 
-            className="w-full bg-vsrk-gold hover:bg-vsrk-dark text-black hover:text-white font-medium"
+            className="w-full bg-vsrk-gold hover:bg-vsrk-dark text-black hover:text-white font-medium mt-6 h-12 text-base"
             disabled={isLoading}
           >
             {isLoading ? "Logging in..." : "Login"}
