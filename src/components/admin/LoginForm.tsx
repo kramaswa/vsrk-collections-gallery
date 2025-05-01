@@ -19,6 +19,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const { login } = useAuth();
   const { toast } = useToast();
   
@@ -32,6 +33,7 @@ const LoginForm: React.FC = () => {
   
   const handleSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
+    setAuthError(null);
     
     try {
       const isSuccessful = await login(values.email, values.password);
@@ -42,10 +44,12 @@ const LoginForm: React.FC = () => {
           description: "Welcome to the admin dashboard",
         });
       } else {
+        setAuthError("Invalid email or password. Please try again.");
         form.reset({ email: values.email, password: '' });
       }
     } catch (error) {
       console.error("Login error:", error);
+      setAuthError("An error occurred during login. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -60,6 +64,12 @@ const LoginForm: React.FC = () => {
         <h2 className="font-serif text-2xl font-semibold mb-2">Admin Login</h2>
         <p className="text-gray-600">Enter your credentials to continue</p>
       </div>
+      
+      {authError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 w-full">
+          {authError}
+        </div>
+      )}
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="w-full space-y-4">
@@ -110,6 +120,10 @@ const LoginForm: React.FC = () => {
               </FormItem>
             )}
           />
+          
+          <div className="mt-2 text-sm text-gray-600">
+            Make sure you're using the email and password you created in Supabase.
+          </div>
           
           <Button 
             type="submit" 
