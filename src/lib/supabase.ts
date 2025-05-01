@@ -1,9 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Use hardcoded values for Lovable environments
-// These will be automatically replaced with the correct values 
-// when deployed via the Lovable Supabase integration
+// These placeholder values need to be replaced with your actual Supabase credentials
+// You can get these by connecting your project to Supabase using the green Supabase
+// button in the top right corner of the Lovable interface
 const supabaseUrl = 'https://your-project-id.supabase.co';
 const supabaseAnonKey = 'your-anon-key';
 
