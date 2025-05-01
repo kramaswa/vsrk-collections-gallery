@@ -1,13 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
+import { supabase as integratedSupabase } from '@/integrations/supabase/client';
 
-// These placeholder values need to be replaced with your actual Supabase credentials
-// You can get these by connecting your project to Supabase using the green Supabase
-// button in the top right corner of the Lovable interface
-const supabaseUrl = 'https://your-project-id.supabase.co';
-const supabaseAnonKey = 'your-anon-key';
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use the integrated Supabase client that has the correct credentials
+export const supabase = integratedSupabase;
 
 // Helper function to get the current user
 export const getCurrentUser = async () => {

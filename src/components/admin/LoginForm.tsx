@@ -4,12 +4,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { Lock, Mail, AlertTriangle } from 'lucide-react';
+import { Lock, Mail } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -66,16 +65,6 @@ const LoginForm: React.FC = () => {
         <p className="text-gray-600">Enter your credentials to continue</p>
       </div>
       
-      {/* Supabase Connection Alert */}
-      <Alert variant="destructive" className="mb-6">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Supabase Connection Required</AlertTitle>
-        <AlertDescription>
-          This project needs to be connected to Supabase before the admin login will work. 
-          Click the green Supabase button in the top right corner to connect.
-        </AlertDescription>
-      </Alert>
-      
       {authError && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 w-full text-center">
           {authError}
@@ -102,6 +91,7 @@ const LoginForm: React.FC = () => {
                       autoComplete="email"
                       required
                       aria-label="Email Address"
+                      style={{ fontSize: '16px' }} /* Force consistent font size */
                     />
                   </div>
                 </FormControl>
@@ -128,6 +118,7 @@ const LoginForm: React.FC = () => {
                       autoComplete="current-password"
                       required
                       aria-label="Password"
+                      style={{ fontSize: '16px' }} /* Force consistent font size */
                     />
                   </div>
                 </FormControl>
