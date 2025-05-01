@@ -66,29 +66,31 @@ const LoginForm: React.FC = () => {
       </div>
       
       {authError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 w-full">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 w-full text-center">
           {authError}
         </div>
       )}
       
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="w-full space-y-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="w-full space-y-6">
+          {/* Email Field - Ensuring this is prominently displayed */}
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem className="mb-4">
-                <FormLabel className="text-base font-medium">Email Address</FormLabel>
+              <FormItem>
+                <FormLabel className="text-base font-medium">Email Address <span className="text-red-500">*</span></FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                     <Input
                       placeholder="Enter your email address"
-                      className="pl-10 h-12 text-base"
+                      className="pl-10 h-12 text-base border-2"
                       {...field}
                       type="email"
                       autoComplete="email"
                       required
+                      aria-label="Email Address"
                     />
                   </div>
                 </FormControl>
@@ -97,22 +99,24 @@ const LoginForm: React.FC = () => {
             )}
           />
           
+          {/* Password Field */}
           <FormField
             control={form.control}
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base font-medium">Password</FormLabel>
+                <FormLabel className="text-base font-medium">Password <span className="text-red-500">*</span></FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                     <Input
                       type="password"
                       placeholder="Enter your password"
-                      className="pl-10 h-12 text-base"
+                      className="pl-10 h-12 text-base border-2"
                       {...field}
                       autoComplete="current-password"
                       required
+                      aria-label="Password"
                     />
                   </div>
                 </FormControl>
@@ -121,13 +125,13 @@ const LoginForm: React.FC = () => {
             )}
           />
           
-          <div className="mt-2 text-sm text-gray-600">
-            Make sure you're using the email and password you created in Supabase.
+          <div className="mt-2 text-sm text-center text-gray-600">
+            <strong>Note:</strong> Use the email and password you created in Supabase.
           </div>
           
           <Button 
             type="submit" 
-            className="w-full bg-vsrk-gold hover:bg-vsrk-dark text-black hover:text-white font-medium mt-6 h-12 text-base"
+            className="w-full bg-vsrk-gold hover:bg-vsrk-dark text-black hover:text-white font-medium h-14 text-base"
             disabled={isLoading}
           >
             {isLoading ? "Logging in..." : "Login"}
