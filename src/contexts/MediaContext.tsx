@@ -33,7 +33,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         await ensureStorageBucketsExist();
         
         // Check if the table exists first
-        const { error: tableCheckError } = await supabase
+        const { error: tableCheckError } = await (supabase as any)
           .from('media_items')
           .select('count')
           .limit(1)
@@ -46,7 +46,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return;
         }
         
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from('media_items')
           .select('*')
           .order('created_at', { ascending: false }) as PostgrestSingleResponse<MediaItem[]>;
@@ -145,7 +145,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       
       // Create database record
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('media_items')
         .insert([
           {
@@ -187,7 +187,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setIsLoading(true);
       
       // Get the media item first to know which storage bucket to delete from
-      const { data: itemToDelete, error: fetchError } = await supabase
+      const { data: itemToDelete, error: fetchError } = await (supabase as any)
         .from('media_items')
         .select('*')
         .eq('id', id)
@@ -243,7 +243,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       
       // Delete the database record
-      const { error: deleteError } = await supabase
+      const { error: deleteError } = await (supabase as any)
         .from('media_items')
         .delete()
         .eq('id', id) as PostgrestSingleResponse<null>;
@@ -288,7 +288,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const newFeaturedState = !item.featured;
       
       // Update in database
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('media_items')
         .update({ featured: newFeaturedState })
         .eq('id', id) as PostgrestSingleResponse<null>;
