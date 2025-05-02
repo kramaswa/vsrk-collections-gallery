@@ -6,10 +6,11 @@ import LoginForm from '@/components/admin/LoginForm';
 import UploadForm from '@/components/admin/UploadForm';
 import MediaManager from '@/components/admin/MediaManager';
 import ContentManager from '@/components/admin/ContentManager';
+import MessageManager from '@/components/admin/MessageManager';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/components/ui/use-toast';
-import { LogOut, Loader2, ImageIcon, TextIcon } from 'lucide-react';
+import { LogOut, Loader2, ImageIcon, TextIcon, MessageSquare } from 'lucide-react';
 
 const Admin: React.FC = () => {
   const { isAuthenticated, logout, loading, user } = useAuth();
@@ -64,6 +65,9 @@ const Admin: React.FC = () => {
                 <TabsTrigger value="content" className="flex items-center">
                   <TextIcon className="mr-2 h-4 w-4" /> Page Content
                 </TabsTrigger>
+                <TabsTrigger value="messages" className="flex items-center">
+                  <MessageSquare className="mr-2 h-4 w-4" /> Messages
+                </TabsTrigger>
               </TabsList>
               
               <TabsContent value="media">
@@ -80,6 +84,12 @@ const Admin: React.FC = () => {
               <TabsContent value="content">
                 <div className="mt-6">
                   <ContentManager />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="messages">
+                <div className="mt-6">
+                  <MessageManager />
                 </div>
               </TabsContent>
             </Tabs>

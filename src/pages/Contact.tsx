@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { Instagram } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const Contact: React.FC = () => {
   const [name, setName] = useState('');
@@ -15,12 +16,22 @@ const Contact: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
+    try {
+      // Insert the message into the contact_messages table
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert([
+          { name, email, message }
+        ]);
+      
+      if (error) {
+        throw error;
+      }
+      
       toast({
         title: "Message sent!",
         description: "Thank you for contacting us. We'll get back to you soon.",
@@ -29,8 +40,16 @@ const Contact: React.FC = () => {
       setName('');
       setEmail('');
       setMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "There was a problem sending your message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
   
   return (
