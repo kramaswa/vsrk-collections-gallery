@@ -155,7 +155,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             type: item.type,
             featured: item.featured,
           }
-        ] as any); // Type assertion to avoid TS errors
+        ] as any); // Type assertion for TypeScript
       
       if (error) {
         throw error;
@@ -285,7 +285,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Update in database
       const { error } = await supabase
         .from('media_items')
-        .update({ featured: newFeaturedState } as any)
+        .update({ featured: newFeaturedState } as any) // Type assertion for TypeScript
         .eq('id', id);
       
       if (error) {
