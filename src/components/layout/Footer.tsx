@@ -1,10 +1,53 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const Footer: React.FC = () => {
   const year = new Date().getFullYear();
+  const [footerContent, setFooterContent] = useState({
+    copyright_text: `© ${year} VSRK Collections. All rights reserved. Designed with passion.`,
+    contact_text: 'If you have any questions or inquiries, feel free to reach out to us.'
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchFooterContent = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('page_content')
+          .select('section, content')
+          .eq('page', 'footer');
+        
+        if (error) {
+          console.error('Error fetching footer content:', error);
+          return;
+        }
+        
+        if (data && data.length > 0) {
+          const contentMap = data.reduce((acc, item) => {
+            acc[item.section] = item.content;
+            return acc;
+          }, {} as Record<string, string>);
+          
+          setFooterContent(prev => ({
+            copyright_text: contentMap.copyright_text || prev.copyright_text,
+            contact_text: contentMap.contact_text || prev.contact_text
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch footer content:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchFooterContent();
+  }, []);
+  
+  // Replace {year} placeholder with the actual year
+  const copyrightText = footerContent.copyright_text.replace('{year}', year.toString());
   
   return (
     <footer className="bg-vsrk-dark text-white py-12">
@@ -46,7 +89,7 @@ const Footer: React.FC = () => {
           
           <div>
             <h3 className="font-serif text-xl mb-4 text-vsrk-gold">Contact</h3>
-            <p className="text-gray-300">If you have any questions or inquiries, feel free to reach out to us.</p>
+            <p className="text-gray-300">{footerContent.contact_text}</p>
             <Link to="/contact" className="text-vsrk-gold hover:underline mt-2 inline-block">
               Contact Us
             </Link>
@@ -54,7 +97,7 @@ const Footer: React.FC = () => {
         </div>
         
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>© {year} VSRK Collections. All rights reserved. Designed with passion.</p>
+          <p>{copyrightText}</p>
           <p className="mt-2 text-sm">
             <Link to="/admin" className="text-gray-500 hover:text-vsrk-gold transition-colors">Admin</Link>
           </p>
