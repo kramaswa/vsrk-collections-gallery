@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Instagram } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
 
 const Contact: React.FC = () => {
   const [name, setName] = useState('');
@@ -16,7 +17,66 @@ const Contact: React.FC = () => {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  
+  const [pageContent, setPageContent] = useState({
+    intro_text: 'Have questions about our jewelry or interested in a custom piece? Get in touch with us.',
+    email: 'info@vsrkcollections.com',
+    phone: '(555) 123-4567',
+    instagram: '@vsrk.collections',
+    instagram_url: 'https://www.instagram.com/vsrk.collections/?igsh=cGNiZGVmb2R3MGgy',
+    business_hours_title: 'Business Hours',
+    business_hours_mon_fri: '9:00 AM - 5:00 PM',
+    business_hours_saturday: '10:00 AM - 3:00 PM',
+    business_hours_sunday: 'Closed',
+    form_title: 'Send a Message',
+    connect_title: 'Connect With Us'
+  });
+  
+  useEffect(() => {
+    const fetchPageContent = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('page_content')
+          .select('section, content')
+          .eq('page', 'contact');
+        
+        if (error) {
+          console.error('Error fetching contact page content:', error);
+          return;
+        }
+        
+        if (data && data.length > 0) {
+          const contentMap = data.reduce((acc, item) => {
+            acc[item.section] = item.content;
+            return acc;
+          }, {} as Record<string, string>);
+          
+          setPageContent(prev => ({
+            intro_text: contentMap.intro_text || prev.intro_text,
+            email: contentMap.email || prev.email,
+            phone: contentMap.phone || prev.phone,
+            instagram: contentMap.instagram || prev.instagram,
+            instagram_url: contentMap.instagram_url || prev.instagram_url,
+            business_hours_title: contentMap.business_hours_title || prev.business_hours_title,
+            business_hours_mon_fri: contentMap.business_hours_mon_fri || prev.business_hours_mon_fri,
+            business_hours_saturday: contentMap.business_hours_saturday || prev.business_hours_saturday,
+            business_hours_sunday: contentMap.business_hours_sunday || prev.business_hours_sunday,
+            form_title: contentMap.form_title || prev.form_title,
+            connect_title: contentMap.connect_title || prev.connect_title
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch contact page content:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchPageContent();
+  }, []);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,19 +121,32 @@ const Contact: React.FC = () => {
     }
   };
   
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-16 flex justify-center items-center h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto text-vsrk-gold" />
+            <p className="mt-4 text-lg text-gray-600">Loading contact information...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+  
   return (
     <Layout>
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="font-serif text-4xl font-medium mb-4">Contact Us</h1>
           <p className="text-gray-700">
-            Have questions about our jewelry or interested in a custom piece? Get in touch with us.
+            {pageContent.intro_text}
           </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="bg-white p-8 rounded-lg shadow-sm">
-            <h2 className="font-serif text-2xl mb-6">Send a Message</h2>
+            <h2 className="font-serif text-2xl mb-6">{pageContent.form_title}</h2>
             
             {submitError && (
               <Alert variant="destructive" className="mb-6">
@@ -129,49 +202,49 @@ const Contact: React.FC = () => {
           
           <div>
             <div className="bg-white p-8 rounded-lg shadow-sm mb-6">
-              <h2 className="font-serif text-2xl mb-6">Connect With Us</h2>
+              <h2 className="font-serif text-2xl mb-6">{pageContent.connect_title}</h2>
               
               <div className="space-y-4">
                 <div>
                   <h3 className="font-medium mb-1">Email</h3>
-                  <p className="text-gray-700">info@vsrkcollections.com</p>
+                  <p className="text-gray-700">{pageContent.email}</p>
                 </div>
                 
                 <div>
                   <h3 className="font-medium mb-1">Phone</h3>
-                  <p className="text-gray-700">(555) 123-4567</p>
+                  <p className="text-gray-700">{pageContent.phone}</p>
                 </div>
                 
                 <div>
                   <h3 className="font-medium mb-1">Follow Us</h3>
                   <a 
-                    href="https://www.instagram.com/vsrk.collections/?igsh=cGNiZGVmb2R3MGgy" 
+                    href={pageContent.instagram_url} 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="flex items-center text-vsrk-dark hover:text-vsrk-gold transition-colors"
                   >
                     <Instagram className="mr-2" size={20} />
-                    @vsrk.collections
+                    {pageContent.instagram}
                   </a>
                 </div>
               </div>
             </div>
             
             <div className="bg-white p-8 rounded-lg shadow-sm">
-              <h2 className="font-serif text-2xl mb-6">Business Hours</h2>
+              <h2 className="font-serif text-2xl mb-6">{pageContent.business_hours_title}</h2>
               
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="font-medium">Monday - Friday</span>
-                  <span>9:00 AM - 5:00 PM</span>
+                  <span>{pageContent.business_hours_mon_fri}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Saturday</span>
-                  <span>10:00 AM - 3:00 PM</span>
+                  <span>{pageContent.business_hours_saturday}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Sunday</span>
-                  <span>Closed</span>
+                  <span>{pageContent.business_hours_sunday}</span>
                 </div>
               </div>
             </div>
