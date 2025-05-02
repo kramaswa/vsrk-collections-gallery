@@ -56,7 +56,7 @@ const Admin: React.FC = () => {
               </Button>
             </div>
             
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
                 <TabsTrigger value="media" className="flex items-center">
                   <ImageIcon className="mr-2 h-4 w-4" /> Media
@@ -65,22 +65,24 @@ const Admin: React.FC = () => {
                   <TextIcon className="mr-2 h-4 w-4" /> Page Content
                 </TabsTrigger>
               </TabsList>
+              
+              <TabsContent value="media">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
+                  <div className="lg:col-span-1">
+                    <UploadForm />
+                  </div>
+                  <div className="lg:col-span-2">
+                    <MediaManager />
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="content">
+                <div className="mt-6">
+                  <ContentManager />
+                </div>
+              </TabsContent>
             </Tabs>
-            
-            <TabsContent value="media" className="mt-0">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1">
-                  <UploadForm />
-                </div>
-                <div className="lg:col-span-2">
-                  <MediaManager />
-                </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="content" className="mt-0">
-              <ContentManager />
-            </TabsContent>
           </>
         ) : (
           <div className="max-w-md mx-auto">
