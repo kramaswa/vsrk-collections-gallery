@@ -46,7 +46,7 @@ const Footer: React.FC = () => {
           
           <div>
             <h3 className="font-serif text-xl mb-4 text-vsrk-gold">Contact</h3>
-            <p className="text-gray-300">If you have any questions or inquiries, feel free to reach out.</p>
+            <p className="text-gray-300">If you have any questions or inquiries, feel free to reach out to us.</p>
             <Link to="/contact" className="text-vsrk-gold hover:underline mt-2 inline-block">
               Contact Us
             </Link>
@@ -54,7 +54,7 @@ const Footer: React.FC = () => {
         </div>
         
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>© {year} VSRK Collections. All rights reserved.</p>
+          <p>© {year} VSRK Collections. All rights reserved. Designed with passion.</p>
           <p className="mt-2 text-sm">
             <Link to="/admin" className="text-gray-500 hover:text-vsrk-gold transition-colors">Admin</Link>
           </p>
