@@ -24,6 +24,8 @@ const Contact: React.FC = () => {
     setSubmitError(null);
     
     try {
+      console.log('Submitting contact form:', { name, email, message });
+      
       // Insert the message into the contact_messages table
       const { error } = await supabase
         .from('contact_messages')
@@ -35,6 +37,8 @@ const Contact: React.FC = () => {
         console.error('Supabase error:', error);
         throw error;
       }
+      
+      console.log('Contact form submitted successfully');
       
       toast({
         title: "Message sent!",
