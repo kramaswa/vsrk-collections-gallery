@@ -1,5 +1,6 @@
 
 import { createClient } from '@supabase/supabase-js';
+import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { supabase as integratedSupabase } from '@/integrations/supabase/client';
 
 // Use the integrated Supabase client that has the correct credentials
