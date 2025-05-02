@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, MediaItem, StorageBucket, ensureStorageBucketsExist, Database } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
@@ -6,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
 
 type UploadMediaItem = Omit<MediaItem, 'id' | 'created_at'>;
+type UpdateMediaItem = Partial<Pick<MediaItem, 'title' | 'description' | 'featured'>>;
 
 type MediaContextType = {
   mediaItems: MediaItem[];
@@ -13,6 +13,7 @@ type MediaContextType = {
   addMediaItem: (item: UploadMediaItem, file: File, thumbnailFile?: File) => Promise<boolean>;
   deleteMediaItem: (id: string) => Promise<boolean>;
   toggleFeatured: (id: string) => Promise<boolean>;
+  updateMediaItem: (id: string, updates: UpdateMediaItem) => Promise<boolean>;
   isLoading: boolean;
   refreshMedia: () => Promise<void>;
 };
@@ -293,6 +294,45 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
   
+  // Update a media item
+  const updateMediaItem = async (id: string, updates: UpdateMediaItem): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      
+      // Update in database
+      const { error } = await (supabase as any)
+        .from('media_items')
+        .update(updates)
+        .eq('id', id) as PostgrestSingleResponse<null>;
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Update local state
+      setMediaItems(mediaItems.map(item => 
+        item.id === id ? { ...item, ...updates } : item
+      ));
+      
+      toast({
+        title: 'Media updated',
+        description: 'Media item has been updated successfully',
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error updating media item:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update media item',
+        variant: 'destructive',
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   // Toggle featured status
   const toggleFeatured = async (id: string): Promise<boolean> => {
     try {
@@ -350,6 +390,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addMediaItem, 
         deleteMediaItem, 
         toggleFeatured,
+        updateMediaItem,
         isLoading,
         refreshMedia
       }}

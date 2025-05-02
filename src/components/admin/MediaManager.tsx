@@ -12,7 +12,8 @@ import {
   ArrowUp,
   ArrowDown,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Pencil
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -26,18 +27,30 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 type SortField = 'title' | 'type' | 'created_at';
 type SortOrder = 'asc' | 'desc';
 
 const MediaManager: React.FC = () => {
-  const { mediaItems, deleteMediaItem, toggleFeatured, isLoading, refreshMedia } = useMedia();
+  const { mediaItems, deleteMediaItem, toggleFeatured, isLoading, refreshMedia, updateMediaItem } = useMedia();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState<MediaItem | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
   
   const handleDelete = async (id: string) => {
@@ -57,6 +70,37 @@ const MediaManager: React.FC = () => {
         description: `Item has been ${currentState ? "removed from" : "added to"} featured items`,
       });
     }
+  };
+  
+  const handleEditOpen = (item: MediaItem) => {
+    setItemToEdit(item);
+    setEditTitle(item.title);
+    setEditDescription(item.description || '');
+  };
+  
+  const handleEditClose = () => {
+    setItemToEdit(null);
+    setEditTitle('');
+    setEditDescription('');
+  };
+  
+  const handleEditSave = async () => {
+    if (!itemToEdit) return;
+    
+    setIsEditing(true);
+    const success = await updateMediaItem(itemToEdit.id, {
+      title: editTitle,
+      description: editDescription
+    });
+    
+    if (success) {
+      toast({
+        title: "Media updated",
+        description: "The media item has been updated successfully",
+      });
+      handleEditClose();
+    }
+    setIsEditing(false);
   };
   
   const toggleSort = (field: SortField) => {
@@ -207,6 +251,7 @@ const MediaManager: React.FC = () => {
               item={item}
               onDelete={() => setItemToDelete(item.id)}
               onToggleFeatured={() => handleToggleFeatured(item.id, item.featured)}
+              onEdit={() => handleEditOpen(item)}
               isDeleting={deletingId === item.id}
             />
           ))}
@@ -232,6 +277,54 @@ const MediaManager: React.FC = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      <Dialog open={!!itemToEdit} onOpenChange={(open) => !open && handleEditClose()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Media Item</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-title">Title</Label>
+              <Input
+                id="edit-title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Media title"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Input
+                id="edit-description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Media description"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={handleEditClose}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleEditSave}
+              disabled={!editTitle.trim() || isEditing}
+              className="ml-2"
+            >
+              {isEditing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -240,6 +333,7 @@ interface MediaListItemProps {
   item: MediaItem;
   onDelete: () => void;
   onToggleFeatured: () => void;
+  onEdit: () => void;
   isDeleting: boolean;
 }
 
@@ -247,6 +341,7 @@ const MediaListItem: React.FC<MediaListItemProps> = ({
   item, 
   onDelete,
   onToggleFeatured,
+  onEdit,
   isDeleting 
 }) => {
   const formattedDate = format(new Date(item.created_at), 'MMM d, yyyy');
@@ -292,6 +387,14 @@ const MediaListItem: React.FC<MediaListItemProps> = ({
           />
           <label htmlFor={`featured-${item.id}`} className="text-xs">Featured</label>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onEdit}
+          className="text-blue-600 h-8 w-8 p-0"
+        >
+          <Pencil className="h-4 w-4" />
+        </Button>
         <Button
           variant="ghost"
           size="sm"
