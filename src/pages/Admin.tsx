@@ -1,17 +1,20 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginForm from '@/components/admin/LoginForm';
 import UploadForm from '@/components/admin/UploadForm';
 import MediaManager from '@/components/admin/MediaManager';
+import ContentManager from '@/components/admin/ContentManager';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/components/ui/use-toast';
-import { LogOut, Loader2 } from 'lucide-react';
+import { LogOut, Loader2, ImageIcon, TextIcon } from 'lucide-react';
 
 const Admin: React.FC = () => {
   const { isAuthenticated, logout, loading, user } = useAuth();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("media");
   
   const handleLogout = async () => {
     await logout();
@@ -53,14 +56,31 @@ const Admin: React.FC = () => {
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-1">
-                <UploadForm />
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+              <TabsList>
+                <TabsTrigger value="media" className="flex items-center">
+                  <ImageIcon className="mr-2 h-4 w-4" /> Media
+                </TabsTrigger>
+                <TabsTrigger value="content" className="flex items-center">
+                  <TextIcon className="mr-2 h-4 w-4" /> Page Content
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
+            <TabsContent value="media" className="mt-0">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-1">
+                  <UploadForm />
+                </div>
+                <div className="lg:col-span-2">
+                  <MediaManager />
+                </div>
               </div>
-              <div className="lg:col-span-2">
-                <MediaManager />
-              </div>
-            </div>
+            </TabsContent>
+            
+            <TabsContent value="content" className="mt-0">
+              <ContentManager />
+            </TabsContent>
           </>
         ) : (
           <div className="max-w-md mx-auto">
