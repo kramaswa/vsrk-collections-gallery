@@ -38,6 +38,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       }
       
+      if (data?.session) {
+        console.log("Found existing session:", data.session);
+        console.log("User metadata:", data.session.user?.user_metadata);
+      }
+      
       setSession(data.session);
       setUser(data.session?.user ?? null);
       setIsAuthenticated(!!data.session);
@@ -46,10 +51,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     getInitialSession();
     
-    // Listen for auth changes
+    // Listen for auth changes with more detailed logging
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         console.log("Auth event:", event);
+        
+        if (newSession?.user) {
+          console.log("User metadata in onAuthStateChange:", newSession.user.user_metadata);
+        }
+        
         setSession(newSession);
         setUser(newSession?.user ?? null);
         setIsAuthenticated(!!newSession);
@@ -62,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [toast]);
   
+  // Refactor login function to ensure we capture the user metadata correctly
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
@@ -79,6 +90,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         return false;
       }
+      
+      console.log("Login successful, user metadata:", data.user?.user_metadata);
       
       setUser(data.user);
       setSession(data.session);

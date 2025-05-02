@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginForm from '@/components/admin/LoginForm';
@@ -16,6 +16,19 @@ const Admin: React.FC = () => {
   const { isAuthenticated, logout, loading, user } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("media");
+  const [userName, setUserName] = useState<string | null>(null);
+  
+  // Ensure user name is properly stored and doesn't disappear
+  useEffect(() => {
+    if (user) {
+      console.log("Admin component - user data:", user);
+      const displayName = user.user_metadata?.name || user.email;
+      console.log("Setting display name:", displayName);
+      setUserName(displayName);
+    } else {
+      setUserName(null);
+    }
+  }, [user]);
   
   const handleLogout = async () => {
     await logout();
@@ -47,7 +60,7 @@ const Admin: React.FC = () => {
               <div>
                 <h1 className="font-serif text-4xl font-medium">Admin Dashboard</h1>
                 <p className="text-gray-600 mt-2">
-                  Welcome, {user?.user_metadata?.name || user?.email}
+                  Welcome, {userName || (user?.user_metadata?.name || user?.email)}
                 </p>
               </div>
               <Button 
