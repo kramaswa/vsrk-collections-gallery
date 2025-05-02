@@ -1,8 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase, MediaItem, StorageBucket, ensureStorageBucketsExist } from '@/lib/supabase';
+import { supabase, MediaItem, StorageBucket, ensureStorageBucketsExist, Database } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
+import { PostgrestSingleResponse } from '@supabase/supabase-js';
 
 type UploadMediaItem = Omit<MediaItem, 'id' | 'created_at'>;
 
@@ -36,7 +37,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           .from('media_items')
           .select('count')
           .limit(1)
-          .single() as any;
+          .single();
         
         if (tableCheckError) {
           console.error('Media items table may not exist:', tableCheckError);
@@ -48,7 +49,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const { data, error } = await supabase
           .from('media_items')
           .select('*')
-          .order('created_at', { ascending: false }) as any;
+          .order('created_at', { ascending: false });
         
         if (error) {
           throw error;
@@ -155,7 +156,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             type: item.type,
             featured: item.featured,
           }
-        ]) as any;
+        ]);
       
       if (error) {
         throw error;
@@ -190,7 +191,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .from('media_items')
         .select('*')
         .eq('id', id)
-        .single() as any;
+        .single();
       
       if (fetchError) {
         throw fetchError;
@@ -241,7 +242,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const { error: deleteError } = await supabase
         .from('media_items')
         .delete()
-        .eq('id', id) as any;
+        .eq('id', id);
       
       if (deleteError) {
         throw deleteError;
@@ -282,11 +283,11 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       const newFeaturedState = !item.featured;
       
-      // Update in database - this is the corrected code with proper type assertion placement
+      // Update in database
       const { error } = await supabase
         .from('media_items')
         .update({ featured: newFeaturedState })
-        .eq('id', id) as any;
+        .eq('id', id);
       
       if (error) {
         throw error;
