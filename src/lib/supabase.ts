@@ -24,3 +24,46 @@ export type MediaItem = {
   // Backward compatibility for components that might still use url
   url?: string;
 };
+
+// Define bucket types to prevent "bucket not found" errors
+export type StorageBucket = 'jewelry_images' | 'jewelry_videos' | 'thumbnails';
+
+// Helper function to create storage buckets if they don't exist
+export const ensureStorageBucketsExist = async (): Promise<void> => {
+  try {
+    // Check and create jewelry_images bucket
+    const { data: imagesData, error: imagesError } = await supabase.storage.getBucket('jewelry_images');
+    if (imagesError) {
+      const { error } = await supabase.storage.createBucket('jewelry_images', {
+        public: true,
+        fileSizeLimit: 52428800, // 50MB
+      });
+      if (error) console.error('Error creating jewelry_images bucket:', error);
+    }
+    
+    // Check and create jewelry_videos bucket
+    const { data: videosData, error: videosError } = await supabase.storage.getBucket('jewelry_videos');
+    if (videosError) {
+      const { error } = await supabase.storage.createBucket('jewelry_videos', {
+        public: true,
+        fileSizeLimit: 52428800, // 50MB
+      });
+      if (error) console.error('Error creating jewelry_videos bucket:', error);
+    }
+    
+    // Check and create thumbnails bucket
+    const { data: thumbnailsData, error: thumbnailsError } = await supabase.storage.getBucket('thumbnails');
+    if (thumbnailsError) {
+      const { error } = await supabase.storage.createBucket('thumbnails', {
+        public: true,
+        fileSizeLimit: 52428800, // 50MB
+      });
+      if (error) console.error('Error creating thumbnails bucket:', error);
+    }
+    
+    console.log('Storage buckets setup complete');
+  } catch (error) {
+    console.error('Error in ensureStorageBucketsExist:', error);
+    throw error;
+  }
+};

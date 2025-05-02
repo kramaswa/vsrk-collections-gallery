@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase, MediaItem } from '@/lib/supabase';
+import { supabase, MediaItem, StorageBucket, ensureStorageBucketsExist } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,11 +22,15 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   
-  // Fetch all media items on component mount
+  // Setup storage buckets and fetch media items on component mount
   useEffect(() => {
-    const fetchMediaItems = async () => {
+    const setupAndFetchData = async () => {
       try {
         setIsLoading(true);
+        
+        // First ensure the storage buckets exist
+        await ensureStorageBucketsExist();
+        
         // Check if the table exists first
         const { error: tableCheckError } = await supabase
           .from('media_items')
@@ -63,7 +67,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     };
     
-    fetchMediaItems();
+    setupAndFetchData();
     
     // Set up real-time subscription for media items
     const subscription = supabase
@@ -76,7 +80,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }, 
         (payload) => {
           console.log('Change received!', payload);
-          fetchMediaItems();
+          setupAndFetchData();
         }
       )
       .subscribe();
@@ -93,31 +97,8 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const fileName = `${uuidv4()}.${fileExt}`;
       const filePath = `${path}/${fileName}`;
       
-      // Create storage buckets if they don't exist
-      for (const bucket of ['jewelry_images', 'jewelry_videos', 'thumbnails']) {
-        try {
-          const { data: existingBucket, error } = await supabase.storage.getBucket(bucket);
-          
-          if (error) {
-            // Bucket doesn't exist, create it
-            console.log(`Creating bucket: ${bucket}`);
-            const { error: createError } = await supabase.storage.createBucket(bucket, {
-              public: true,
-              fileSizeLimit: 52428800, // 50MB
-            });
-            
-            if (createError) {
-              console.error(`Error creating bucket ${bucket}:`, createError);
-              throw createError;
-            }
-          }
-        } catch (error) {
-          console.error(`Error checking bucket ${bucket}:`, error);
-        }
-      }
-      
       // Determine the correct bucket
-      const bucketName = file.type.startsWith('image/') ? 
+      const bucketName: StorageBucket = file.type.startsWith('image/') ? 
         (path === 'thumbnails' ? 'thumbnails' : 'jewelry_images') : 
         'jewelry_videos';
       
@@ -237,7 +218,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         try {
           const path = getPathFromUrl(mediaUrl);
           if (path) {
-            await supabase.storage.from(bucket).remove([path]);
+            await supabase.storage.from(bucket as StorageBucket).remove([path]);
           }
         } catch (storageError) {
           console.error('Error deleting file from storage:', storageError);
