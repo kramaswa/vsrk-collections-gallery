@@ -73,12 +73,12 @@ const LoginForm: React.FC = () => {
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="w-full space-y-6">
-          {/* Email Field - Ensuring this is prominently displayed */}
+          {/* Email Field */}
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormLabel className="text-base font-medium">Email Address <span className="text-red-500">*</span></FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -90,8 +90,7 @@ const LoginForm: React.FC = () => {
                       type="email"
                       autoComplete="email"
                       required
-                      aria-label="Email Address"
-                      style={{ fontSize: '16px' }} /* Force consistent font size */
+                      style={{ fontSize: '16px' }}
                     />
                   </div>
                 </FormControl>
@@ -105,7 +104,7 @@ const LoginForm: React.FC = () => {
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormLabel className="text-base font-medium">Password <span className="text-red-500">*</span></FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -117,8 +116,7 @@ const LoginForm: React.FC = () => {
                       {...field}
                       autoComplete="current-password"
                       required
-                      aria-label="Password"
-                      style={{ fontSize: '16px' }} /* Force consistent font size */
+                      style={{ fontSize: '16px' }}
                     />
                   </div>
                 </FormControl>
