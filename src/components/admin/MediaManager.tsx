@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMedia, MediaItem } from '@/contexts/MediaContext';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,7 +11,8 @@ import {
   Video as VideoIcon,
   ArrowUp,
   ArrowDown,
-  Loader2
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -30,12 +31,13 @@ type SortField = 'title' | 'type' | 'created_at';
 type SortOrder = 'asc' | 'desc';
 
 const MediaManager: React.FC = () => {
-  const { mediaItems, deleteMediaItem, toggleFeatured, isLoading } = useMedia();
+  const { mediaItems, deleteMediaItem, toggleFeatured, isLoading, refreshMedia } = useMedia();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
   
   const handleDelete = async (id: string) => {
@@ -66,6 +68,16 @@ const MediaManager: React.FC = () => {
     }
   };
   
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refreshMedia();
+    setIsRefreshing(false);
+    toast({
+      title: "Media refreshed",
+      description: "The media list has been refreshed with the latest items",
+    });
+  };
+  
   const filteredItems = mediaItems.filter(item => 
     item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -88,9 +100,35 @@ const MediaManager: React.FC = () => {
     return 0;
   });
   
+  // Display a message if no items after upload
+  useEffect(() => {
+    if (!isLoading && mediaItems.length === 0) {
+      console.log("No media items found in MediaManager");
+    } else {
+      console.log(`Found ${mediaItems.length} media items`);
+    }
+  }, [mediaItems, isLoading]);
+  
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="font-serif text-2xl font-semibold mb-6">Manage Media</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="font-serif text-2xl font-semibold">Manage Media</h2>
+        
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-1"
+        >
+          {isRefreshing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+          Refresh
+        </Button>
+      </div>
       
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-grow">
@@ -151,6 +189,15 @@ const MediaManager: React.FC = () => {
           <p className="text-gray-500">
             {searchTerm ? "No media items match your search" : "No media items found"}
           </p>
+          {!searchTerm && (
+            <Button 
+              variant="outline"
+              onClick={handleRefresh}
+              className="mt-4"
+            >
+              Refresh Media List
+            </Button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">

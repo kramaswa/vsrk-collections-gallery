@@ -14,6 +14,7 @@ type MediaContextType = {
   deleteMediaItem: (id: string) => Promise<boolean>;
   toggleFeatured: (id: string) => Promise<boolean>;
   isLoading: boolean;
+  refreshMedia: () => Promise<void>;
 };
 
 const MediaContext = createContext<MediaContextType | undefined>(undefined);
@@ -23,48 +24,63 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   
+  // Fetch media items function that can be called on demand
+  const fetchMediaItems = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Check if the table exists first
+      const { error: tableCheckError } = await (supabase as any)
+        .from('media_items')
+        .select('count')
+        .limit(1)
+        .single() as PostgrestSingleResponse<{ count: number }>;
+      
+      if (tableCheckError) {
+        console.error('Media items table may not exist:', tableCheckError);
+        setMediaItems([]);
+        return;
+      }
+      
+      const { data, error } = await (supabase as any)
+        .from('media_items')
+        .select('*')
+        .order('created_at', { ascending: false }) as PostgrestSingleResponse<MediaItem[]>;
+      
+      if (error) {
+        throw error;
+      }
+      
+      console.log("Fetched media items:", data?.length || 0);
+      setMediaItems(data || []);
+    } catch (error) {
+      console.error('Error fetching media items:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load media items. The database table might not be set up yet.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Public function to refresh media items
+  const refreshMedia = async () => {
+    await fetchMediaItems();
+  };
+  
   // Setup storage buckets and fetch media items on component mount
   useEffect(() => {
     const setupAndFetchData = async () => {
       try {
-        setIsLoading(true);
-        
         // First ensure the storage buckets exist
         await ensureStorageBucketsExist();
         
-        // Check if the table exists first
-        const { error: tableCheckError } = await (supabase as any)
-          .from('media_items')
-          .select('count')
-          .limit(1)
-          .single() as PostgrestSingleResponse<{ count: number }>;
-        
-        if (tableCheckError) {
-          console.error('Media items table may not exist:', tableCheckError);
-          setMediaItems([]);
-          setIsLoading(false);
-          return;
-        }
-        
-        const { data, error } = await (supabase as any)
-          .from('media_items')
-          .select('*')
-          .order('created_at', { ascending: false }) as PostgrestSingleResponse<MediaItem[]>;
-        
-        if (error) {
-          throw error;
-        }
-        
-        setMediaItems(data || []);
+        // Then fetch media items
+        await fetchMediaItems();
       } catch (error) {
-        console.error('Error fetching media items:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load media items. The database table might not be set up yet.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
+        console.error('Error in setupAndFetchData:', error);
       }
     };
     
@@ -81,7 +97,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }, 
         (payload) => {
           console.log('Change received!', payload);
-          setupAndFetchData();
+          fetchMediaItems();
         }
       )
       .subscribe();
@@ -166,6 +182,9 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         title: 'Success',
         description: 'Media item added successfully',
       });
+      
+      // Refresh media items after adding a new one
+      fetchMediaItems();
       
       return true;
     } catch (error: any) {
@@ -331,7 +350,8 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addMediaItem, 
         deleteMediaItem, 
         toggleFeatured,
-        isLoading
+        isLoading,
+        refreshMedia
       }}
     >
       {children}
