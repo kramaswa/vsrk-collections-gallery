@@ -26,6 +26,16 @@ export type MediaItem = {
   url?: string;
 };
 
+// Define contact message type
+export type ContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+};
+
 // Define bucket types to prevent "bucket not found" errors
 export type StorageBucket = 'jewelry_images' | 'jewelry_videos' | 'thumbnails';
 
@@ -37,6 +47,11 @@ export type Database = {
         Row: MediaItem;
         Insert: Omit<MediaItem, 'id' | 'created_at'>;
         Update: Partial<Omit<MediaItem, 'id' | 'created_at'>>;
+      };
+      contact_messages: {
+        Row: ContactMessage;
+        Insert: Omit<ContactMessage, 'id' | 'created_at'>;
+        Update: Partial<Omit<ContactMessage, 'id' | 'created_at'>>;
       };
     };
     Views: {

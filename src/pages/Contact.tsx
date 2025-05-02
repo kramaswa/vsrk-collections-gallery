@@ -8,27 +8,31 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { Instagram } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Contact: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const { toast } = useToast();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError(null);
     
     try {
       // Insert the message into the contact_messages table
       const { error } = await supabase
         .from('contact_messages')
         .insert([
-          { name, email, message }
+          { name, email, message, read: false }
         ]);
       
       if (error) {
+        console.error('Supabase error:', error);
         throw error;
       }
       
@@ -42,6 +46,7 @@ const Contact: React.FC = () => {
       setMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
+      setSubmitError("There was a problem sending your message. Please try again.");
       toast({
         title: "Error",
         description: "There was a problem sending your message. Please try again.",
@@ -65,6 +70,12 @@ const Contact: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="bg-white p-8 rounded-lg shadow-sm">
             <h2 className="font-serif text-2xl mb-6">Send a Message</h2>
+            
+            {submitError && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertDescription>{submitError}</AlertDescription>
+              </Alert>
+            )}
             
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
