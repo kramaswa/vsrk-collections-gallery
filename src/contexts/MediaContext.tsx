@@ -37,7 +37,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           .from('media_items')
           .select('count')
           .limit(1)
-          .single();
+          .single() as PostgrestSingleResponse<{ count: number }>;
         
         if (tableCheckError) {
           console.error('Media items table may not exist:', tableCheckError);
@@ -49,13 +49,13 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const { data, error } = await supabase
           .from('media_items')
           .select('*')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false }) as PostgrestSingleResponse<MediaItem[]>;
         
         if (error) {
           throw error;
         }
         
-        setMediaItems(data as MediaItem[]);
+        setMediaItems(data || []);
       } catch (error) {
         console.error('Error fetching media items:', error);
         toast({
@@ -156,7 +156,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             type: item.type,
             featured: item.featured,
           }
-        ]);
+        ]) as PostgrestSingleResponse<null>;
       
       if (error) {
         throw error;
@@ -191,15 +191,19 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .from('media_items')
         .select('*')
         .eq('id', id)
-        .single();
+        .single() as PostgrestSingleResponse<MediaItem>;
       
       if (fetchError) {
         throw fetchError;
       }
       
+      if (!itemToDelete) {
+        throw new Error('Media item not found');
+      }
+
       // Extract file paths from URLs
-      const mediaUrl = itemToDelete?.media_url;
-      const thumbnailUrl = itemToDelete?.thumbnail_url;
+      const mediaUrl = itemToDelete.media_url;
+      const thumbnailUrl = itemToDelete.thumbnail_url;
       
       // Extract file path for storage deletion
       const getPathFromUrl = (url: string) => {
@@ -214,7 +218,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       };
       
       // Delete the main file from storage
-      if (mediaUrl && itemToDelete) {
+      if (mediaUrl) {
         const bucket: StorageBucket = itemToDelete.type === 'image' ? 'jewelry_images' : 'jewelry_videos';
         try {
           const path = getPathFromUrl(mediaUrl);
@@ -242,7 +246,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const { error: deleteError } = await supabase
         .from('media_items')
         .delete()
-        .eq('id', id);
+        .eq('id', id) as PostgrestSingleResponse<null>;
       
       if (deleteError) {
         throw deleteError;
@@ -287,7 +291,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const { error } = await supabase
         .from('media_items')
         .update({ featured: newFeaturedState })
-        .eq('id', id);
+        .eq('id', id) as PostgrestSingleResponse<null>;
       
       if (error) {
         throw error;
