@@ -27,6 +27,20 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const fetchMediaItems = async () => {
       try {
         setIsLoading(true);
+        // Check if the table exists first
+        const { error: tableCheckError } = await supabase
+          .from('media_items')
+          .select('count')
+          .limit(1)
+          .single();
+        
+        if (tableCheckError) {
+          console.error('Media items table may not exist:', tableCheckError);
+          setMediaItems([]);
+          setIsLoading(false);
+          return;
+        }
+        
         const { data, error } = await supabase
           .from('media_items')
           .select('*')
@@ -41,7 +55,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         console.error('Error fetching media items:', error);
         toast({
           title: 'Error',
-          description: 'Failed to load media items',
+          description: 'Failed to load media items. The database table might not be set up yet.',
           variant: 'destructive',
         });
       } finally {
@@ -74,24 +88,57 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   
   // Upload file to Supabase storage
   const uploadFileToStorage = async (file: File, path: string): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${uuidv4()}.${fileExt}`;
-    const filePath = `${path}/${fileName}`;
-    
-    const { error: uploadError } = await supabase.storage
-      .from(file.type.startsWith('image/') ? 'jewelry-images' : 'jewelry-videos')
-      .upload(filePath, file);
-    
-    if (uploadError) {
-      throw uploadError;
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = `${path}/${fileName}`;
+      
+      // Create storage buckets if they don't exist
+      for (const bucket of ['jewelry_images', 'jewelry_videos', 'thumbnails']) {
+        try {
+          const { data: existingBucket, error } = await supabase.storage.getBucket(bucket);
+          
+          if (error) {
+            // Bucket doesn't exist, create it
+            console.log(`Creating bucket: ${bucket}`);
+            const { error: createError } = await supabase.storage.createBucket(bucket, {
+              public: true,
+              fileSizeLimit: 52428800, // 50MB
+            });
+            
+            if (createError) {
+              console.error(`Error creating bucket ${bucket}:`, createError);
+              throw createError;
+            }
+          }
+        } catch (error) {
+          console.error(`Error checking bucket ${bucket}:`, error);
+        }
+      }
+      
+      // Determine the correct bucket
+      const bucketName = file.type.startsWith('image/') ? 
+        (path === 'thumbnails' ? 'thumbnails' : 'jewelry_images') : 
+        'jewelry_videos';
+      
+      const { error: uploadError } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, file);
+      
+      if (uploadError) {
+        throw uploadError;
+      }
+      
+      // Get public URL
+      const { data } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(filePath);
+      
+      return data.publicUrl;
+    } catch (error) {
+      console.error("Error in uploadFileToStorage:", error);
+      throw error;
     }
-    
-    // Get public URL
-    const { data } = supabase.storage
-      .from(file.type.startsWith('image/') ? 'jewelry-images' : 'jewelry-videos')
-      .getPublicUrl(filePath);
-    
-    return data.publicUrl;
   };
   
   // Add a new media item
@@ -169,22 +216,29 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       
       // Extract file paths from URLs
-      const mediaUrl = itemToDelete.media_url;
-      const thumbnailUrl = itemToDelete.thumbnail_url;
+      const mediaUrl = itemToDelete?.media_url;
+      const thumbnailUrl = itemToDelete?.thumbnail_url;
       
       // Extract file path for storage deletion
       const getPathFromUrl = (url: string) => {
-        const urlObj = new URL(url);
-        const pathSegments = urlObj.pathname.split('/');
-        return pathSegments.slice(pathSegments.length - 2).join('/');
+        try {
+          const urlObj = new URL(url);
+          const pathSegments = urlObj.pathname.split('/');
+          return pathSegments.slice(pathSegments.length - 2).join('/');
+        } catch (error) {
+          console.error("Error parsing URL:", error);
+          return "";
+        }
       };
       
       // Delete the main file from storage
-      if (mediaUrl) {
-        const bucket = itemToDelete.type === 'image' ? 'jewelry-images' : 'jewelry-videos';
+      if (mediaUrl && itemToDelete) {
+        const bucket = itemToDelete.type === 'image' ? 'jewelry_images' : 'jewelry_videos';
         try {
           const path = getPathFromUrl(mediaUrl);
-          await supabase.storage.from(bucket).remove([path]);
+          if (path) {
+            await supabase.storage.from(bucket).remove([path]);
+          }
         } catch (storageError) {
           console.error('Error deleting file from storage:', storageError);
         }
@@ -194,7 +248,9 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (thumbnailUrl) {
         try {
           const thumbnailPath = getPathFromUrl(thumbnailUrl);
-          await supabase.storage.from('thumbnails').remove([thumbnailPath]);
+          if (thumbnailPath) {
+            await supabase.storage.from('thumbnails').remove([thumbnailPath]);
+          }
         } catch (storageError) {
           console.error('Error deleting thumbnail from storage:', storageError);
         }
