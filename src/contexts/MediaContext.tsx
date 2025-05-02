@@ -36,7 +36,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           .from('media_items')
           .select('count')
           .limit(1)
-          .single();
+          .single() as any;
         
         if (tableCheckError) {
           console.error('Media items table may not exist:', tableCheckError);
@@ -48,7 +48,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const { data, error } = await supabase
           .from('media_items')
           .select('*')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false }) as any;
         
         if (error) {
           throw error;
@@ -155,7 +155,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             type: item.type,
             featured: item.featured,
           }
-        ] as any); // Type assertion for TypeScript
+        ]) as any;
       
       if (error) {
         throw error;
@@ -190,7 +190,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .from('media_items')
         .select('*')
         .eq('id', id)
-        .single();
+        .single() as any;
       
       if (fetchError) {
         throw fetchError;
@@ -214,11 +214,11 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       // Delete the main file from storage
       if (mediaUrl && itemToDelete) {
-        const bucket = itemToDelete.type === 'image' ? 'jewelry_images' : 'jewelry_videos';
+        const bucket: StorageBucket = itemToDelete.type === 'image' ? 'jewelry_images' : 'jewelry_videos';
         try {
           const path = getPathFromUrl(mediaUrl);
           if (path) {
-            await supabase.storage.from(bucket as StorageBucket).remove([path]);
+            await supabase.storage.from(bucket).remove([path]);
           }
         } catch (storageError) {
           console.error('Error deleting file from storage:', storageError);
@@ -241,7 +241,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const { error: deleteError } = await supabase
         .from('media_items')
         .delete()
-        .eq('id', id);
+        .eq('id', id) as any;
       
       if (deleteError) {
         throw deleteError;
@@ -285,7 +285,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Update in database
       const { error } = await supabase
         .from('media_items')
-        .update({ featured: newFeaturedState } as any) // Type assertion for TypeScript
+        .update({ featured: newFeaturedState }) as any
         .eq('id', id);
       
       if (error) {
