@@ -282,11 +282,11 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       const newFeaturedState = !item.featured;
       
-      // Update in database
+      // Update in database - this is the corrected code with proper type assertion placement
       const { error } = await supabase
         .from('media_items')
-        .update({ featured: newFeaturedState }) as any
-        .eq('id', id);
+        .update({ featured: newFeaturedState })
+        .eq('id', id) as any;
       
       if (error) {
         throw error;
