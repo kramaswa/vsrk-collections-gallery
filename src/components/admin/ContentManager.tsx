@@ -118,6 +118,7 @@ const ContentManager: React.FC = () => {
     'about': 'About Page',
     'gallery': 'Gallery Page',
     'contact': 'Contact Page',
+    'footer': 'Footer'
   };
 
   return (

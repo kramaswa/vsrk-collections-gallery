@@ -8,7 +8,8 @@ const Footer: React.FC = () => {
   const year = new Date().getFullYear();
   const [footerContent, setFooterContent] = useState({
     copyright_text: `© ${year} VSRK Collections. All rights reserved. Designed with passion.`,
-    contact_text: 'If you have any questions or inquiries, feel free to reach out to us.'
+    contact_text: 'If you have any questions or inquiries, feel free to reach out to us.',
+    brand_tagline: 'Exquisite handcrafted jewelry for every occasion.'
   });
   const [isLoading, setIsLoading] = useState(true);
   
@@ -33,7 +34,8 @@ const Footer: React.FC = () => {
           
           setFooterContent(prev => ({
             copyright_text: contentMap.copyright_text || prev.copyright_text,
-            contact_text: contentMap.contact_text || prev.contact_text
+            contact_text: contentMap.contact_text || prev.contact_text,
+            brand_tagline: contentMap.brand_tagline || prev.brand_tagline
           }));
         }
       } catch (error) {
@@ -55,7 +57,7 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="font-serif text-2xl mb-4 text-vsrk-gold">VSRK Collections</h3>
-            <p className="text-gray-300 mb-4">Exquisite handcrafted jewelry for every occasion.</p>
+            <p className="text-gray-300 mb-4">{footerContent.brand_tagline}</p>
             <div className="flex items-center">
               <a 
                 href="https://www.instagram.com/vsrk.collections/?igsh=cGNiZGVmb2R3MGgy" 
