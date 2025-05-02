@@ -46,7 +46,9 @@ const Admin: React.FC = () => {
             <div className="flex justify-between items-center mb-8">
               <div>
                 <h1 className="font-serif text-4xl font-medium">Admin Dashboard</h1>
-                <p className="text-gray-600 mt-2">Welcome, {user?.email}</p>
+                <p className="text-gray-600 mt-2">
+                  Welcome, {user?.user_metadata?.name || user?.email}
+                </p>
               </div>
               <Button 
                 variant="outline"
