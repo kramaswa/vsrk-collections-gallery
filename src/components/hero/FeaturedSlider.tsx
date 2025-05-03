@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useMedia } from '@/contexts/MediaContext';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 const FeaturedSlider: React.FC = () => {
   const { featuredItems } = useMedia();
@@ -28,7 +30,7 @@ const FeaturedSlider: React.FC = () => {
   }
   
   return (
-    <div className="relative w-full h-[600px] overflow-hidden">
+    <div className="relative w-full h-[600px] overflow-hidden bg-gray-100">
       {featuredItems.map((item, index) => (
         <div
           key={item.id}
@@ -37,11 +39,14 @@ const FeaturedSlider: React.FC = () => {
           }`}
         >
           {item.type === 'image' ? (
-            <img
-              src={item.media_url}
-              alt={item.title}
-              className="w-full h-full object-cover"
-            />
+            <div className="w-full h-full relative">
+              <img
+                src={item.media_url}
+                alt={item.title}
+                className="w-full h-full object-contain md:object-cover"
+                loading={index === currentIndex ? "eager" : "lazy"}
+              />
+            </div>
           ) : (
             <video
               src={item.media_url}

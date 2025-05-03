@@ -10,7 +10,9 @@ import { ArrowRight, Instagram } from 'lucide-react';
 const Index: React.FC = () => {
   return (
     <Layout>
-      <FeaturedSlider />
+      <div className="w-full overflow-hidden">
+        <FeaturedSlider />
+      </div>
       
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
