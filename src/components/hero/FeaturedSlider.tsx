@@ -30,7 +30,7 @@ const FeaturedSlider: React.FC = () => {
   }
   
   return (
-    <div className="relative w-full h-[600px] overflow-hidden bg-gray-100">
+    <div className="relative w-full h-[600px] overflow-hidden bg-black">
       {featuredItems.map((item, index) => (
         <div
           key={item.id}
@@ -39,11 +39,12 @@ const FeaturedSlider: React.FC = () => {
           }`}
         >
           {item.type === 'image' ? (
-            <div className="w-full h-full relative">
+            <div className="w-full h-full flex items-center justify-center">
               <img
                 src={item.media_url}
                 alt={item.title}
-                className="w-full h-full object-contain md:object-cover"
+                className="w-full h-full object-contain"
+                style={{ objectFit: 'contain', maxHeight: '100%', maxWidth: '100%' }}
                 loading={index === currentIndex ? "eager" : "lazy"}
               />
             </div>
