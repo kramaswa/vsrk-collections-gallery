@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 const FeaturedSlider: React.FC = () => {
-  const { featuredItems } = useMedia();
+  const { featuredItems, refreshMedia } = useMedia();
   const [currentIndex, setCurrentIndex] = useState(0);
   
   const goToNext = useCallback(() => {
@@ -17,6 +17,13 @@ const FeaturedSlider: React.FC = () => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + featuredItems.length) % featuredItems.length);
   };
   
+  // Force refresh the media items when component mounts
+  useEffect(() => {
+    // Refresh media when component mounts to ensure we have the latest data
+    refreshMedia();
+    console.log('FeaturedSlider mounted, refreshing media items');
+  }, [refreshMedia]);
+  
   // Auto-advance the slider every 5 seconds
   useEffect(() => {
     if (featuredItems.length <= 1) return;
@@ -24,6 +31,11 @@ const FeaturedSlider: React.FC = () => {
     const interval = setInterval(goToNext, 5000);
     return () => clearInterval(interval);
   }, [featuredItems.length, goToNext]);
+  
+  // Log when featured items change
+  useEffect(() => {
+    console.log('Featured items loaded:', featuredItems.length, featuredItems);
+  }, [featuredItems]);
   
   if (featuredItems.length === 0) {
     return null;

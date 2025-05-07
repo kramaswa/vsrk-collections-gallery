@@ -1,13 +1,22 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import FeaturedSlider from '@/components/hero/FeaturedSlider';
 import MediaGrid from '@/components/media/MediaGrid';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Instagram } from 'lucide-react';
+import { useMedia } from '@/contexts/MediaContext';
 
 const Index: React.FC = () => {
+  const { refreshMedia } = useMedia();
+  
+  // Force refresh media when the index page loads
+  useEffect(() => {
+    refreshMedia();
+    console.log('Index page mounted, refreshing media');
+  }, [refreshMedia]);
+
   return (
     <Layout>
       <div className="w-full overflow-hidden">
