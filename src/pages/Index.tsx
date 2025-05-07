@@ -13,8 +13,22 @@ const Index: React.FC = () => {
   
   // Force refresh media when the index page loads
   useEffect(() => {
-    refreshMedia();
     console.log('Index page mounted, refreshing media');
+    refreshMedia();
+    
+    // This will ensure we refresh media items whenever the user navigates back to this page
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Page became visible, refreshing media');
+        refreshMedia();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [refreshMedia]);
 
   return (

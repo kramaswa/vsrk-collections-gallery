@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase, MediaItem, StorageBucket, ensureStorageBucketsExist, Database } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,15 +23,17 @@ const MediaContext = createContext<MediaContextType | undefined>(undefined);
 export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
   const { toast } = useToast();
   
   // Fetch media items function that can be called on demand
-  const fetchMediaItems = async () => {
+  const fetchMediaItems = useCallback(async () => {
     try {
       setIsLoading(true);
+      console.log("Fetching media items from database...");
       
       // Check if the table exists first
-      const { error: tableCheckError } = await (supabase as any)
+      const { error: tableCheckError } = await supabase
         .from('media_items')
         .select('count')
         .limit(1)
@@ -43,7 +45,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return;
       }
       
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('media_items')
         .select('*')
         .order('created_at', { ascending: false }) as PostgrestSingleResponse<MediaItem[]>;
@@ -52,27 +54,54 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         throw error;
       }
       
-      console.log("Fetched media items:", data?.length || 0);
-      setMediaItems(data || []);
+      console.log("Fetched media items:", data?.length);
+      
+      // Save to state
+      if (data && data.length > 0) {
+        setMediaItems(data);
+        // Also save to session storage as a fallback
+        sessionStorage.setItem('vsrk_media_items', JSON.stringify(data));
+      } else if (data && data.length === 0) {
+        // If no data, check if we have cached data
+        const cachedData = sessionStorage.getItem('vsrk_media_items');
+        if (cachedData) {
+          console.log("Using cached media items");
+          setMediaItems(JSON.parse(cachedData));
+        } else {
+          setMediaItems([]);
+        }
+      }
     } catch (error) {
       console.error('Error fetching media items:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load media items. The database table might not be set up yet.',
-        variant: 'destructive',
-      });
+      
+      // Try to use cached data if available
+      const cachedData = sessionStorage.getItem('vsrk_media_items');
+      if (cachedData) {
+        console.log("Using cached media items due to error");
+        setMediaItems(JSON.parse(cachedData));
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to load media items. Please check your connection and try again.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsLoading(false);
+      setInitialized(true);
     }
-  };
+  }, [toast]);
   
   // Public function to refresh media items
-  const refreshMedia = async () => {
+  const refreshMedia = useCallback(async () => {
+    console.log("Refreshing media items...");
     await fetchMediaItems();
-  };
+  }, [fetchMediaItems]);
   
   // Setup storage buckets and fetch media items on component mount
   useEffect(() => {
+    console.log("MediaProvider: Setting up and fetching initial data...");
+    
     const setupAndFetchData = async () => {
       try {
         // First ensure the storage buckets exist
@@ -106,7 +135,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, [toast]);
+  }, [fetchMediaItems]);
   
   // Upload file to Supabase storage
   const uploadFileToStorage = async (file: File, path: string): Promise<string> => {
@@ -380,7 +409,13 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
   
+  // Calculate featured items whenever media items change
   const featuredItems = mediaItems.filter(item => item.featured);
+  
+  // Log the featuredItems on change
+  useEffect(() => {
+    console.log("Featured items calculated:", featuredItems.length);
+  }, [featuredItems]);
   
   return (
     <MediaContext.Provider 
