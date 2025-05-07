@@ -18,12 +18,17 @@ type MediaContextType = {
   refreshMedia: () => Promise<void>;
 };
 
+const CACHE_KEY = 'vsrk_media_items';
+
 const MediaContext = createContext<MediaContextType | undefined>(undefined);
 
 export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>(() => {
+    // Try to load from cache on initial render
+    const cached = localStorage.getItem(CACHE_KEY);
+    return cached ? JSON.parse(cached) : [];
+  });
   const [isLoading, setIsLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
   const { toast } = useToast();
   
   // Fetch media items function that can be called on demand
@@ -41,7 +46,6 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       if (tableCheckError) {
         console.error('Media items table may not exist:', tableCheckError);
-        setMediaItems([]);
         return;
       }
       
@@ -58,28 +62,22 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       // Save to state
       if (data && data.length > 0) {
-        setMediaItems(data);
-        // Also save to session storage as a fallback
-        sessionStorage.setItem('vsrk_media_items', JSON.stringify(data));
-      } else if (data && data.length === 0) {
-        // If no data, check if we have cached data
-        const cachedData = sessionStorage.getItem('vsrk_media_items');
-        if (cachedData) {
-          console.log("Using cached media items");
-          setMediaItems(JSON.parse(cachedData));
-        } else {
-          setMediaItems([]);
-        }
+        // Process the data to ensure all fields are present
+        const processedItems = data.map(item => ({
+          ...item,
+          url: item.media_url // For backward compatibility
+        }));
+        
+        setMediaItems(processedItems);
+        
+        // Save to localStorage for persistent caching
+        localStorage.setItem(CACHE_KEY, JSON.stringify(processedItems));
       }
     } catch (error) {
       console.error('Error fetching media items:', error);
       
-      // Try to use cached data if available
-      const cachedData = sessionStorage.getItem('vsrk_media_items');
-      if (cachedData) {
-        console.log("Using cached media items due to error");
-        setMediaItems(JSON.parse(cachedData));
-      } else {
+      // Only show toast if we don't have cached data
+      if (mediaItems.length === 0) {
         toast({
           title: 'Error',
           description: 'Failed to load media items. Please check your connection and try again.',
@@ -88,9 +86,8 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     } finally {
       setIsLoading(false);
-      setInitialized(true);
     }
-  }, [toast]);
+  }, [toast, mediaItems.length]);
   
   // Public function to refresh media items
   const refreshMedia = useCallback(async () => {
@@ -132,10 +129,23 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       )
       .subscribe();
     
+    // Also refresh on focus/visibility change - helps with dev mode reconnections
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Page became visible, refreshing media');
+        refreshMedia();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', refreshMedia);
+    
     return () => {
       supabase.removeChannel(subscription);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', refreshMedia);
     };
-  }, [fetchMediaItems]);
+  }, [fetchMediaItems, refreshMedia]);
   
   // Upload file to Supabase storage
   const uploadFileToStorage = async (file: File, path: string): Promise<string> => {
@@ -414,7 +424,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   
   // Log the featuredItems on change
   useEffect(() => {
-    console.log("Featured items calculated:", featuredItems.length);
+    console.log("Featured items calculated:", featuredItems.length, featuredItems);
   }, [featuredItems]);
   
   return (

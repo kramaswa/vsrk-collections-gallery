@@ -2,36 +2,41 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useMedia } from '@/contexts/MediaContext';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, RefreshCw } from 'lucide-react';
 
 const FeaturedSlider: React.FC = () => {
   const { featuredItems, refreshMedia, isLoading } = useMedia();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   
   const goToNext = useCallback(() => {
     if (featuredItems.length > 0) {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % featuredItems.length);
+      setIsImageLoaded(false); // Reset image loaded state for new slide
     }
   }, [featuredItems.length]);
   
   const goToPrev = useCallback(() => {
     if (featuredItems.length > 0) {
       setCurrentIndex((prevIndex) => (prevIndex - 1 + featuredItems.length) % featuredItems.length);
+      setIsImageLoaded(false); // Reset image loaded state for new slide
     }
   }, [featuredItems.length]);
   
-  // Force refresh the media items when component mounts
+  // Force refresh the media items when component mounts and whenever retry counter changes
   useEffect(() => {
-    console.log('FeaturedSlider mounted, refreshing media items');
+    console.log('FeaturedSlider mounted or retry requested, refreshing media items');
     refreshMedia();
-  }, [refreshMedia]);
+  }, [refreshMedia, retryCount]);
   
   // Reset current index when featured items change
   useEffect(() => {
     if (featuredItems.length > 0 && currentIndex >= featuredItems.length) {
       setCurrentIndex(0);
     }
+    
+    console.log('Featured items updated in slider:', featuredItems.length);
   }, [featuredItems, currentIndex]);
   
   // Auto-advance the slider every 5 seconds
@@ -42,11 +47,11 @@ const FeaturedSlider: React.FC = () => {
     return () => clearInterval(interval);
   }, [featuredItems.length, goToNext]);
   
-  // Log when featured items change
-  useEffect(() => {
-    console.log('Featured items loaded in slider:', featuredItems.length, featuredItems);
-  }, [featuredItems]);
+  const handleManualRefresh = () => {
+    setRetryCount(prev => prev + 1);
+  };
   
+  // If loading, show loader
   if (isLoading) {
     return (
       <div className="relative w-full h-[600px] overflow-hidden bg-black flex items-center justify-center">
@@ -58,6 +63,7 @@ const FeaturedSlider: React.FC = () => {
     );
   }
   
+  // If no featured items, show message with refresh button
   if (featuredItems.length === 0) {
     return (
       <div className="relative w-full h-[600px] overflow-hidden bg-black flex items-center justify-center">
@@ -65,9 +71,10 @@ const FeaturedSlider: React.FC = () => {
           <p className="text-white text-xl mb-4">No featured items to display</p>
           <Button 
             variant="outline" 
-            onClick={() => refreshMedia()}
-            className="text-white border-white hover:bg-white/20"
+            onClick={handleManualRefresh}
+            className="text-white border-white hover:bg-white/20 flex items-center gap-2"
           >
+            <RefreshCw className="h-4 w-4" />
             Refresh
           </Button>
         </div>

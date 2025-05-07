@@ -13,12 +13,23 @@ type AuthContextType = {
   loading: boolean;
 };
 
+// Cache keys
+const AUTH_USER_CACHE = 'vsrk_auth_user';
+const AUTH_SESSION_CACHE = 'vsrk_auth_session';
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  // Try to load initial state from cache
+  const [user, setUser] = useState<User | null>(() => {
+    const cached = localStorage.getItem(AUTH_USER_CACHE);
+    return cached ? JSON.parse(cached) : null;
+  });
+  const [session, setSession] = useState<Session | null>(() => {
+    const cached = localStorage.getItem(AUTH_SESSION_CACHE);
+    return cached ? JSON.parse(cached) : null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!user);
   const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
   
@@ -46,6 +57,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(data.session);
       setUser(data.session?.user ?? null);
       setIsAuthenticated(!!data.session);
+      
+      // Save to cache
+      if (data.session) {
+        localStorage.setItem(AUTH_USER_CACHE, JSON.stringify(data.session.user));
+        localStorage.setItem(AUTH_SESSION_CACHE, JSON.stringify(data.session));
+      }
+      
       setLoading(false);
     };
     
@@ -58,6 +76,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (newSession?.user) {
           console.log("User metadata in onAuthStateChange:", newSession.user.user_metadata);
+          localStorage.setItem(AUTH_USER_CACHE, JSON.stringify(newSession.user));
+          localStorage.setItem(AUTH_SESSION_CACHE, JSON.stringify(newSession));
+        } else if (event === 'SIGNED_OUT') {
+          localStorage.removeItem(AUTH_USER_CACHE);
+          localStorage.removeItem(AUTH_SESSION_CACHE);
         }
         
         setSession(newSession);
@@ -67,12 +90,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
     
+    // Refresh auth state when tab becomes visible (helps with dev mode)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Page became visible, refreshing auth state');
+        supabase.auth.getSession().then(({ data }) => {
+          if (data?.session) {
+            setSession(data.session);
+            setUser(data.session.user);
+            setIsAuthenticated(true);
+          }
+        });
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     return () => {
       authListener.subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [toast]);
   
-  // Refactor login function to ensure we capture the user metadata correctly
+  // Login function
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
@@ -96,6 +136,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(data.user);
       setSession(data.session);
       setIsAuthenticated(true);
+      
+      // Save to cache
+      localStorage.setItem(AUTH_USER_CACHE, JSON.stringify(data.user));
+      localStorage.setItem(AUTH_SESSION_CACHE, JSON.stringify(data.session));
+      
       return true;
     } catch (err) {
       console.error("Unexpected login error:", err);
@@ -123,6 +168,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         return;
       }
+      
+      // Clear cache
+      localStorage.removeItem(AUTH_USER_CACHE);
+      localStorage.removeItem(AUTH_SESSION_CACHE);
       
       setUser(null);
       setSession(null);
