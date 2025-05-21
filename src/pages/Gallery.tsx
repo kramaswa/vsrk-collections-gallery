@@ -11,7 +11,7 @@ import { JEWELRY_CATEGORIES } from '@/lib/constants';
 const Gallery: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   
   return (
     <Layout>
@@ -41,7 +41,7 @@ const Gallery: React.FC = () => {
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {JEWELRY_CATEGORIES.map((cat) => (
                   <SelectItem key={cat} value={cat}>
                     {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -74,7 +74,7 @@ const Gallery: React.FC = () => {
         <MediaGrid 
           searchQuery={searchQuery} 
           viewMode={viewMode} 
-          categoryFilter={categoryFilter} 
+          categoryFilter={categoryFilter !== "all" ? categoryFilter : ""} 
         />
       </div>
     </Layout>
