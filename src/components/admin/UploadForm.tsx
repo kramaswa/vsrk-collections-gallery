@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useMedia } from '@/contexts/MediaContext';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { Upload, Image, Video, AlertCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { JEWELRY_CATEGORIES } from '@/lib/constants';
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
@@ -23,6 +24,7 @@ const UploadForm: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [category, setCategory] = useState<string>('uncategorized');
   
   const { addMediaItem } = useMedia();
   const { toast } = useToast();
@@ -85,6 +87,7 @@ const UploadForm: React.FC = () => {
     setThumbnailFile(null);
     setUploadProgress(0);
     setError(null);
+    setCategory('uncategorized');
   };
   
   const simulateProgress = () => {
@@ -135,6 +138,7 @@ const UploadForm: React.FC = () => {
           thumbnail_url: null,  // Will be set by addMediaItem function
           type: fileType,
           featured,
+          category, // Add the category field
         },
         file,
         fileType === 'video' ? thumbnailFile : undefined
@@ -191,6 +195,27 @@ const UploadForm: React.FC = () => {
               Video
             </Button>
           </div>
+        </div>
+        
+        {/* Category dropdown */}
+        <div className="space-y-2">
+          <Label htmlFor="category">Category</Label>
+          <Select
+            value={category}
+            onValueChange={setCategory}
+            disabled={isUploading}
+          >
+            <SelectTrigger id="category">
+              <SelectValue placeholder="Select a category" />
+            </SelectTrigger>
+            <SelectContent>
+              {JEWELRY_CATEGORIES.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         
         <div className="space-y-2">

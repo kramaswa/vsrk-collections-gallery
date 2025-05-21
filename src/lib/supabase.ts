@@ -22,6 +22,7 @@ export type MediaItem = {
   thumbnail_url: string | null;
   type: 'image' | 'video';
   featured: boolean;
+  category: string;
   // Backward compatibility for components that might still use url
   url?: string;
 };

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase, MediaItem, StorageBucket, ensureStorageBucketsExist, Database } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
@@ -5,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
 
 type UploadMediaItem = Omit<MediaItem, 'id' | 'created_at'>;
-type UpdateMediaItem = Partial<Pick<MediaItem, 'title' | 'description' | 'featured'>>;
+type UpdateMediaItem = Partial<Pick<MediaItem, 'title' | 'description' | 'featured' | 'category'>>;
 
 type MediaContextType = {
   mediaItems: MediaItem[];
@@ -65,7 +66,8 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         // Process the data to ensure all fields are present
         const processedItems = data.map(item => ({
           ...item,
-          url: item.media_url // For backward compatibility
+          url: item.media_url, // For backward compatibility
+          category: item.category || 'uncategorized' // Ensure category exists
         }));
         
         setMediaItems(processedItems);
@@ -211,6 +213,7 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             thumbnail_url: thumbnailUrl,
             type: item.type,
             featured: item.featured,
+            category: item.category || 'uncategorized'
           }
         ]) as PostgrestSingleResponse<null>;
       

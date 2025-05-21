@@ -5,10 +5,13 @@ import MediaGrid from '@/components/media/MediaGrid';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, GridIcon, LayoutList } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { JEWELRY_CATEGORIES } from '@/lib/constants';
 
 const Gallery: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
   
   return (
     <Layout>
@@ -32,6 +35,22 @@ const Gallery: React.FC = () => {
             />
           </div>
           
+          <div className="w-full sm:w-[200px]">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Categories</SelectItem>
+                {JEWELRY_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
           <div className="flex">
             <Button 
               variant={viewMode === 'grid' ? 'default' : 'outline'} 
@@ -52,7 +71,11 @@ const Gallery: React.FC = () => {
           </div>
         </div>
         
-        <MediaGrid searchQuery={searchQuery} viewMode={viewMode} />
+        <MediaGrid 
+          searchQuery={searchQuery} 
+          viewMode={viewMode} 
+          categoryFilter={categoryFilter} 
+        />
       </div>
     </Layout>
   );

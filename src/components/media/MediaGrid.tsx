@@ -10,13 +10,15 @@ interface MediaGridProps {
   featuredOnly?: boolean;
   searchQuery?: string;
   viewMode?: 'grid' | 'list';
+  categoryFilter?: string;
 }
 
 const MediaGrid: React.FC<MediaGridProps> = ({ 
   items, 
   featuredOnly = false, 
   searchQuery = '',
-  viewMode = 'grid'
+  viewMode = 'grid',
+  categoryFilter = ''
 }) => {
   const { mediaItems, featuredItems, isLoading } = useMedia();
   
@@ -27,8 +29,13 @@ const MediaGrid: React.FC<MediaGridProps> = ({
   if (searchQuery) {
     displayItems = displayItems.filter(item => 
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
     );
+  }
+  
+  // Apply category filter if provided
+  if (categoryFilter) {
+    displayItems = displayItems.filter(item => item.category === categoryFilter);
   }
   
   if (isLoading) {
@@ -49,11 +56,11 @@ const MediaGrid: React.FC<MediaGridProps> = ({
     return (
       <div className="text-center py-12">
         <h3 className="font-serif text-xl">
-          {searchQuery ? "No items match your search" : "No items to display"}
+          {searchQuery || categoryFilter ? "No items match your criteria" : "No items to display"}
         </h3>
         <p className="text-gray-500 mt-2">
-          {searchQuery 
-            ? "Try changing your search terms" 
+          {searchQuery || categoryFilter 
+            ? "Try changing your search terms or category" 
             : "Check back soon for new additions to our collection."}
         </p>
       </div>

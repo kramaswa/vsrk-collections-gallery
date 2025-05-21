@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { MediaItem } from '@/lib/supabase';
+import { Badge } from '@/components/ui/badge';
+import { Tag } from 'lucide-react';
 
 interface MediaCardProps {
   item: MediaItem;
@@ -45,6 +47,12 @@ const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
           <div className="p-4">
             <h3 className="font-serif text-lg font-medium truncate">{item.title}</h3>
             <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+            <div className="flex items-center mt-2">
+              <Badge variant="outline" className="text-xs flex items-center gap-1 capitalize">
+                <Tag className="h-3 w-3" />
+                {item.category || 'uncategorized'}
+              </Badge>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -70,7 +78,12 @@ const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
               </video>
             )}
             <div className="mt-4">
-              <h3 className="font-serif text-xl font-medium">{item.title}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-serif text-xl font-medium">{item.title}</h3>
+                <Badge variant="outline" className="capitalize">
+                  {item.category || 'uncategorized'}
+                </Badge>
+              </div>
               <p className="text-gray-600 mt-2">{item.description}</p>
             </div>
           </div>

@@ -38,6 +38,7 @@ export type Database = {
       }
       media_items: {
         Row: {
+          category: string
           created_at: string
           description: string | null
           featured: boolean
@@ -48,6 +49,7 @@ export type Database = {
           type: string
         }
         Insert: {
+          category?: string
           created_at?: string
           description?: string | null
           featured?: boolean
@@ -58,6 +60,7 @@ export type Database = {
           type: string
         }
         Update: {
+          category?: string
           created_at?: string
           description?: string | null
           featured?: boolean

@@ -13,7 +13,8 @@ import {
   ArrowDown,
   Loader2,
   RefreshCw,
-  Pencil
+  Pencil,
+  Tag
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -35,8 +36,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { JEWELRY_CATEGORIES } from '@/lib/constants';
 
-type SortField = 'title' | 'type' | 'created_at';
+type SortField = 'title' | 'type' | 'created_at' | 'category';
 type SortOrder = 'asc' | 'desc';
 
 const MediaManager: React.FC = () => {
@@ -50,7 +53,9 @@ const MediaManager: React.FC = () => {
   const [itemToEdit, setItemToEdit] = useState<MediaItem | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editCategory, setEditCategory] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
   const { toast } = useToast();
   
   const handleDelete = async (id: string) => {
@@ -76,12 +81,14 @@ const MediaManager: React.FC = () => {
     setItemToEdit(item);
     setEditTitle(item.title);
     setEditDescription(item.description || '');
+    setEditCategory(item.category || 'uncategorized');
   };
   
   const handleEditClose = () => {
     setItemToEdit(null);
     setEditTitle('');
     setEditDescription('');
+    setEditCategory('');
   };
   
   const handleEditSave = async () => {
@@ -90,7 +97,8 @@ const MediaManager: React.FC = () => {
     setIsEditing(true);
     const success = await updateMediaItem(itemToEdit.id, {
       title: editTitle,
-      description: editDescription
+      description: editDescription,
+      category: editCategory
     });
     
     if (success) {
@@ -122,11 +130,18 @@ const MediaManager: React.FC = () => {
     });
   };
   
-  const filteredItems = mediaItems.filter(item => 
-    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Apply filters
+  const filteredItems = mediaItems.filter(item => {
+    const matchesSearch = 
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = !categoryFilter || item.category === categoryFilter;
+    
+    return matchesSearch && matchesCategory;
+  });
   
+  // Sort filtered items
   const sortedItems = [...filteredItems].sort((a, b) => {
     if (sortField === 'title') {
       return sortOrder === 'asc' 
@@ -136,6 +151,10 @@ const MediaManager: React.FC = () => {
       return sortOrder === 'asc'
         ? a.type.localeCompare(b.type)
         : b.type.localeCompare(a.type);
+    } else if (sortField === 'category') {
+      return sortOrder === 'asc'
+        ? (a.category || '').localeCompare(b.category || '')
+        : (b.category || '').localeCompare(a.category || '');
     } else if (sortField === 'created_at') {
       return sortOrder === 'asc'
         ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
@@ -186,41 +205,68 @@ const MediaManager: React.FC = () => {
           />
         </div>
         
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => toggleSort('title')}
-            className="flex items-center"
-          >
-            Title
-            {sortField === 'title' && (
-              sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
-            )}
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => toggleSort('type')}
-            className="flex items-center"
-          >
-            Type
-            {sortField === 'type' && (
-              sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
-            )}
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => toggleSort('created_at')}
-            className="flex items-center"
-          >
-            Date
-            {sortField === 'created_at' && (
-              sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
-            )}
-          </Button>
+        <div className="w-full sm:w-[200px]">
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Categories</SelectItem>
+              {JEWELRY_CATEGORIES.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+      </div>
+      
+      <div className="flex gap-2 mb-4 flex-wrap">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => toggleSort('title')}
+          className="flex items-center"
+        >
+          Title
+          {sortField === 'title' && (
+            sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
+          )}
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => toggleSort('type')}
+          className="flex items-center"
+        >
+          Type
+          {sortField === 'type' && (
+            sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
+          )}
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => toggleSort('category')}
+          className="flex items-center"
+        >
+          Category
+          {sortField === 'category' && (
+            sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
+          )}
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => toggleSort('created_at')}
+          className="flex items-center"
+        >
+          Date
+          {sortField === 'created_at' && (
+            sortOrder === 'asc' ? <ArrowUp className="ml-1 h-3 w-3" /> : <ArrowDown className="ml-1 h-3 w-3" />
+          )}
+        </Button>
       </div>
       
       {isLoading ? (
@@ -231,9 +277,9 @@ const MediaManager: React.FC = () => {
       ) : sortedItems.length === 0 ? (
         <div className="text-center py-8 border border-dashed rounded-md">
           <p className="text-gray-500">
-            {searchTerm ? "No media items match your search" : "No media items found"}
+            {searchTerm || categoryFilter ? "No media items match your search" : "No media items found"}
           </p>
-          {!searchTerm && (
+          {!searchTerm && !categoryFilter && (
             <Button 
               variant="outline"
               onClick={handleRefresh}
@@ -301,6 +347,21 @@ const MediaManager: React.FC = () => {
                 onChange={(e) => setEditDescription(e.target.value)}
                 placeholder="Media description"
               />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-category">Category</Label>
+              <Select value={editCategory} onValueChange={setEditCategory}>
+                <SelectTrigger id="edit-category">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {JEWELRY_CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>
@@ -375,6 +436,10 @@ const MediaListItem: React.FC<MediaListItemProps> = ({
           <span className="text-xs text-gray-500">({formattedDate})</span>
         </div>
         <p className="text-sm text-gray-500 line-clamp-1">{item.description}</p>
+        <div className="flex items-center mt-1">
+          <Tag className="h-3 w-3 text-gray-400 mr-1" />
+          <span className="text-xs text-gray-500 capitalize">{item.category || 'uncategorized'}</span>
+        </div>
       </div>
       
       <div className="flex items-center space-x-2 flex-shrink-0">
