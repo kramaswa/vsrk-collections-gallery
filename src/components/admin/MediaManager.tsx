@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useMedia, MediaItem } from '@/contexts/MediaContext';
 import { Button } from '@/components/ui/button';
@@ -55,7 +54,7 @@ const MediaManager: React.FC = () => {
   const [editDescription, setEditDescription] = useState('');
   const [editCategory, setEditCategory] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const { toast } = useToast();
   
   const handleDelete = async (id: string) => {
@@ -136,7 +135,7 @@ const MediaManager: React.FC = () => {
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCategory = !categoryFilter || item.category === categoryFilter;
+    const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
     
     return matchesSearch && matchesCategory;
   });
@@ -211,7 +210,7 @@ const MediaManager: React.FC = () => {
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
               {JEWELRY_CATEGORIES.map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -277,9 +276,9 @@ const MediaManager: React.FC = () => {
       ) : sortedItems.length === 0 ? (
         <div className="text-center py-8 border border-dashed rounded-md">
           <p className="text-gray-500">
-            {searchTerm || categoryFilter ? "No media items match your search" : "No media items found"}
+            {searchTerm || categoryFilter !== 'all' ? "No media items match your search" : "No media items found"}
           </p>
-          {!searchTerm && !categoryFilter && (
+          {!searchTerm && categoryFilter === 'all' && (
             <Button 
               variant="outline"
               onClick={handleRefresh}
