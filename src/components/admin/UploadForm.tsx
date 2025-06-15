@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useMedia } from '@/contexts/MediaContext';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import { Upload, Image, Video, AlertCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { JEWELRY_CATEGORIES } from '@/lib/constants';
+import { useCategories } from '@/hooks/useCategories';
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
@@ -27,6 +28,7 @@ const UploadForm: React.FC = () => {
   const [category, setCategory] = useState<string>('uncategorized');
   
   const { addMediaItem } = useMedia();
+  const { categories, isLoading: categoriesLoading } = useCategories();
   const { toast } = useToast();
   
   const validateFile = (file: File, type: 'image' | 'video' | 'thumbnail'): boolean => {
@@ -203,15 +205,15 @@ const UploadForm: React.FC = () => {
           <Select
             value={category}
             onValueChange={setCategory}
-            disabled={isUploading}
+            disabled={isUploading || categoriesLoading}
           >
             <SelectTrigger id="category">
               <SelectValue placeholder="Select a category" />
             </SelectTrigger>
             <SelectContent>
-              {JEWELRY_CATEGORIES.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.name}>
+                  {cat.display_name}
                 </SelectItem>
               ))}
             </SelectContent>

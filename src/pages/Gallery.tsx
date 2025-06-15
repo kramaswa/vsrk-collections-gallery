@@ -6,12 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, GridIcon, LayoutList } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { JEWELRY_CATEGORIES } from '@/lib/constants';
+import { useCategories } from '@/hooks/useCategories';
 
 const Gallery: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const { categories, isLoading: categoriesLoading } = useCategories();
   
   return (
     <Layout>
@@ -42,9 +43,9 @@ const Gallery: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {JEWELRY_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.name}>
+                    {cat.display_name}
                   </SelectItem>
                 ))}
               </SelectContent>

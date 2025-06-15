@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useCategories } from '@/hooks/useCategories';
 import { JEWELRY_CATEGORIES } from '@/lib/constants';
 
 type SortField = 'title' | 'type' | 'created_at' | 'category';
@@ -43,6 +44,7 @@ type SortOrder = 'asc' | 'desc';
 
 const MediaManager: React.FC = () => {
   const { mediaItems, deleteMediaItem, toggleFeatured, isLoading, refreshMedia, updateMediaItem } = useMedia();
+  const { categories, isLoading: categoriesLoading } = useCategories();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
@@ -211,9 +213,9 @@ const MediaManager: React.FC = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {JEWELRY_CATEGORIES.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.name}>
+                  {cat.display_name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -354,9 +356,9 @@ const MediaManager: React.FC = () => {
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {JEWELRY_CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.name}>
+                      {cat.display_name}
                     </SelectItem>
                   ))}
                 </SelectContent>

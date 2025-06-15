@@ -7,10 +7,11 @@ import UploadForm from '@/components/admin/UploadForm';
 import MediaManager from '@/components/admin/MediaManager';
 import ContentManager from '@/components/admin/ContentManager';
 import MessageManager from '@/components/admin/MessageManager';
+import CategoryManager from '@/components/admin/CategoryManager';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/components/ui/use-toast';
-import { LogOut, Loader2, ImageIcon, TextIcon, MessageSquare } from 'lucide-react';
+import { LogOut, Loader2, ImageIcon, TextIcon, MessageSquare, Tag } from 'lucide-react';
 
 const Admin: React.FC = () => {
   const { isAuthenticated, logout, loading, user } = useAuth();
@@ -77,6 +78,9 @@ const Admin: React.FC = () => {
                 <TabsTrigger value="media" className="flex items-center">
                   <ImageIcon className="mr-2 h-4 w-4" /> Media
                 </TabsTrigger>
+                <TabsTrigger value="categories" className="flex items-center">
+                  <Tag className="mr-2 h-4 w-4" /> Categories
+                </TabsTrigger>
                 <TabsTrigger value="content" className="flex items-center">
                   <TextIcon className="mr-2 h-4 w-4" /> Page Content
                 </TabsTrigger>
@@ -93,6 +97,12 @@ const Admin: React.FC = () => {
                   <div className="lg:col-span-2">
                     <MediaManager />
                   </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="categories">
+                <div className="mt-6">
+                  <CategoryManager />
                 </div>
               </TabsContent>
               
