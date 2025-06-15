@@ -37,7 +37,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCategories } from '@/hooks/useCategories';
-import { JEWELRY_CATEGORIES } from '@/lib/constants';
 
 type SortField = 'title' | 'type' | 'created_at' | 'category';
 type SortOrder = 'asc' | 'desc';
