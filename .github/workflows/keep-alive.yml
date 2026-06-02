@@ -1,0 +1,22 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'  # Every 12 hours
+  workflow_dispatch:          # Allow manual trigger from GitHub UI
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://ahyxslcntwjkmifzhwng.supabase.co/rest/v1/categories?limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFoeXhzbGNudHdqa21pZnpod25nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjg1ODksImV4cCI6MjA5NTkwNDU4OX0.qXORrgCngDYliWbBT6llbBChsTHQq9dBnNhl5925j8I" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFoeXhzbGNudHdqa21pZnpod25nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjg1ODksImV4cCI6MjA5NTkwNDU4OX0.qXORrgCngDYliWbBT6llbBChsTHQq9dBnNhl5925j8I")
+          echo "Supabase ping status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "Warning: unexpected status $STATUS"
+            exit 1
+          fi
