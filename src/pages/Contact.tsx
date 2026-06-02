@@ -26,10 +26,6 @@ const Contact: React.FC = () => {
     phone: '(555) 123-4567',
     instagram: '@vsrk.collections',
     instagram_url: 'https://www.instagram.com/vsrk.collections/?igsh=cGNiZGVmb2R3MGgy',
-    business_hours_title: 'Business Hours',
-    business_hours_mon_fri: '9:00 AM - 5:00 PM',
-    business_hours_saturday: '10:00 AM - 3:00 PM',
-    business_hours_sunday: 'Closed',
     form_title: 'Send a Message',
     connect_title: 'Connect With Us'
   });
@@ -60,10 +56,6 @@ const Contact: React.FC = () => {
             phone: contentMap.phone || prev.phone,
             instagram: contentMap.instagram || prev.instagram,
             instagram_url: contentMap.instagram_url || prev.instagram_url,
-            business_hours_title: contentMap.business_hours_title || prev.business_hours_title,
-            business_hours_mon_fri: contentMap.business_hours_mon_fri || prev.business_hours_mon_fri,
-            business_hours_saturday: contentMap.business_hours_saturday || prev.business_hours_saturday,
-            business_hours_sunday: contentMap.business_hours_sunday || prev.business_hours_sunday,
             form_title: contentMap.form_title || prev.form_title,
             connect_title: contentMap.connect_title || prev.connect_title
           }));
@@ -226,25 +218,6 @@ const Contact: React.FC = () => {
                     <Instagram className="mr-2" size={20} />
                     {pageContent.instagram}
                   </a>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white p-8 rounded-lg shadow-sm">
-              <h2 className="font-serif text-2xl mb-6">{pageContent.business_hours_title}</h2>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="font-medium">Monday - Friday</span>
-                  <span>{pageContent.business_hours_mon_fri}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Saturday</span>
-                  <span>{pageContent.business_hours_saturday}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Sunday</span>
-                  <span>{pageContent.business_hours_sunday}</span>
                 </div>
               </div>
             </div>
