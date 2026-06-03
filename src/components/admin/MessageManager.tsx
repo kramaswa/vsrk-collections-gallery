@@ -9,7 +9,8 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Check, Search, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { Check, Search, X, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 // Define the contact message type
 type ContactMessage = {
@@ -116,6 +117,25 @@ const MessageManager: React.FC = () => {
     }
   });
   
+  const deleteMessage = useMutation({
+    mutationFn: async (message: ContactMessage) => {
+      const { error } = await supabase
+        .from('contact_messages')
+        .delete()
+        .eq('id', message.id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contact-messages'] });
+      queryClient.invalidateQueries({ queryKey: ['contact-messages-count'] });
+      setSelectedMessage(null);
+      toast({ title: 'Message deleted', description: 'The message has been permanently deleted.' });
+    },
+    onError: (error) => {
+      toast({ title: 'Error', description: `Failed to delete message: ${error.message}`, variant: 'destructive' });
+    }
+  });
+
   const totalPages = Math.ceil(totalCount / messagesPerPage);
   
   // Reset to first page when search term changes
@@ -287,9 +307,9 @@ const MessageManager: React.FC = () => {
                   <p className="text-sm text-muted-foreground mt-1">{selectedMessage.email}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => toggleReadStatus.mutate(selectedMessage)}
                     className="flex items-center gap-1"
                   >
@@ -303,6 +323,30 @@ const MessageManager: React.FC = () => {
                       </>
                     )}
                   </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" className="flex items-center gap-1">
+                        <Trash2 className="h-4 w-4" /> Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete message?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete the message from {selectedMessage.name}. This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={() => deleteMessage.mutate(selectedMessage)}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardHeader>
               <CardContent>
