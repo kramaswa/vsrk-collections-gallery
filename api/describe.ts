@@ -35,7 +35,8 @@ export default async function handler(req: any, res: any) {
     });
 
     const text = message.content[0].type === 'text' ? message.content[0].text : '{}';
-    const parsed = JSON.parse(text.trim());
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : '{}');
     return res.status(200).json(parsed);
   } catch (error: any) {
     console.error('Claude API error:', error);
