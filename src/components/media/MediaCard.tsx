@@ -62,15 +62,33 @@ const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <div className="p-2">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <h3 className="font-serif text-xl font-medium">{item.title}</h3>
+                <Badge variant="outline" className="capitalize">
+                  {item.category || 'uncategorized'}
+                </Badge>
+              </div>
+              <a
+                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hi! I'm interested in: ${item.title} from VSRK Collections`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center px-3 py-2 rounded-md bg-green-500 hover:bg-green-600 text-white font-medium text-sm transition-colors shrink-0"
+              >
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Inquire on WhatsApp
+              </a>
+            </div>
             {item.type === 'image' ? (
-              <img 
-                src={item.media_url} 
-                alt={item.title} 
+              <img
+                src={item.media_url}
+                alt={item.title}
                 className="w-full h-auto rounded-md"
               />
             ) : (
-              <video 
-                src={item.media_url} 
+              <video
+                src={item.media_url}
                 controls
                 className="w-full h-auto rounded-md"
                 autoPlay
@@ -79,25 +97,9 @@ const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
                 Your browser does not support the video tag.
               </video>
             )}
-            <div className="mt-4">
-              <div className="flex items-center gap-2">
-                <h3 className="font-serif text-xl font-medium">{item.title}</h3>
-                <Badge variant="outline" className="capitalize">
-                  {item.category || 'uncategorized'}
-                </Badge>
-              </div>
-              <p className="text-gray-600 mt-2">{item.description}</p>
-              <a
-                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hi! I'm interested in: ${item.title} from VSRK Collections`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="mt-4 inline-flex items-center px-4 py-2 rounded-md bg-green-500 hover:bg-green-600 text-white font-medium text-sm transition-colors"
-              >
-                <MessageCircle className="mr-2 h-4 w-4" />
-                Inquire on WhatsApp
-              </a>
-            </div>
+            {item.description && (
+              <p className="text-gray-600 mt-3">{item.description}</p>
+            )}
           </div>
         </DialogContent>
       </Dialog>
