@@ -104,7 +104,7 @@ const MediaGrid: React.FC<MediaGridProps> = ({
           {selectedItem && (
             <>
               {/* Header */}
-              <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
+              <div className="flex items-center justify-between px-4 pt-4 pb-3 pr-10 shrink-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <h3 className="font-serif text-xl font-medium truncate">{selectedItem.title}</h3>
                   <Badge variant="outline" className="capitalize shrink-0">{selectedItem.category || 'uncategorized'}</Badge>
