@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
-import { Upload, Image, Video, AlertCircle } from 'lucide-react';
+import { Upload, Image, Video, AlertCircle, Sparkles } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
@@ -23,6 +23,7 @@ const UploadForm: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<string>('uncategorized');
@@ -56,14 +57,53 @@ const UploadForm: React.FC = () => {
     return true;
   };
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const resizeImageForAPI = (file: File): Promise<{ base64: string; mimeType: string }> =>
+    new Promise((resolve) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const maxSize = 1024;
+        let { width, height } = img;
+        if (width > height && width > maxSize) { height = (height * maxSize) / width; width = maxSize; }
+        else if (height > maxSize) { width = (width * maxSize) / height; height = maxSize; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+        const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+        resolve({ base64, mimeType: 'image/jpeg' });
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
-      if (validateFile(selectedFile, fileType)) {
-        setFile(selectedFile);
-      } else {
+      if (!validateFile(selectedFile, fileType)) {
         e.target.value = '';
         setFile(null);
+        return;
+      }
+      setFile(selectedFile);
+
+      if (fileType === 'image') {
+        setIsGenerating(true);
+        setTitle('Generating...');
+        setDescription('Generating...');
+        try {
+          const { base64, mimeType } = await resizeImageForAPI(selectedFile);
+          const res = await fetch('/api/describe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: base64, mimeType }),
+          });
+          const data = await res.json();
+          if (data.title) setTitle(data.title);
+          if (data.description) setDescription(data.description);
+        } catch {
+          setTitle('');
+          setDescription('');
+        } finally {
+          setIsGenerating(false);
+        }
       }
     }
   };
@@ -279,17 +319,20 @@ const UploadForm: React.FC = () => {
         )}
         
         <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title" className="flex items-center gap-2">
+            Title
+            {isGenerating && <span className="text-xs text-vsrk-gold flex items-center gap-1"><Sparkles className="h-3 w-3" /> AI generating...</span>}
+          </Label>
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
             placeholder="Enter a title"
-            disabled={isUploading}
+            disabled={isUploading || isGenerating}
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>
           <Textarea
@@ -298,7 +341,7 @@ const UploadForm: React.FC = () => {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Enter a description"
             rows={3}
-            disabled={isUploading}
+            disabled={isUploading || isGenerating}
           />
         </div>
         
@@ -325,7 +368,7 @@ const UploadForm: React.FC = () => {
         <Button 
           type="submit"
           className="w-full bg-vsrk-gold hover:bg-vsrk-dark text-black hover:text-white font-medium"
-          disabled={isUploading || !file || (fileType === 'video' && !thumbnailFile)}
+          disabled={isUploading || isGenerating || !file || (fileType === 'video' && !thumbnailFile)}
         >
           {isUploading ? "Uploading..." : "Upload"}
         </Button>
