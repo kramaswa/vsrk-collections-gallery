@@ -100,10 +100,11 @@ const MediaGrid: React.FC<MediaGridProps> = ({
       </div>
 
       <Dialog open={selectedIndex !== null} onOpenChange={(open) => { if (!open) setSelectedIndex(null); }}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
           {selectedItem && (
-            <div className="p-2">
-              <div className="flex items-center justify-between mb-3">
+            <>
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <h3 className="font-serif text-xl font-medium truncate">{selectedItem.title}</h3>
                   <Badge variant="outline" className="capitalize shrink-0">{selectedItem.category || 'uncategorized'}</Badge>
@@ -119,11 +120,16 @@ const MediaGrid: React.FC<MediaGridProps> = ({
                 </a>
               </div>
 
-              <div className="relative">
+              {/* Media — fills remaining height, image letterboxed via object-contain */}
+              <div className="relative flex-1 min-h-0 px-4">
                 {selectedItem.type === 'image' ? (
-                  <img src={selectedItem.media_url} alt={selectedItem.title} className="w-full h-auto rounded-md" />
+                  <img
+                    src={selectedItem.media_url}
+                    alt={selectedItem.title}
+                    className="w-full h-full object-contain rounded-md"
+                  />
                 ) : (
-                  <video src={selectedItem.media_url} controls className="w-full h-auto rounded-md" autoPlay playsInline>
+                  <video src={selectedItem.media_url} controls className="w-full h-full object-contain rounded-md" autoPlay playsInline>
                     Your browser does not support the video tag.
                   </video>
                 )}
@@ -134,7 +140,7 @@ const MediaGrid: React.FC<MediaGridProps> = ({
                       variant="outline"
                       size="icon"
                       onClick={(e) => { e.stopPropagation(); goPrev(); }}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow"
+                      className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </Button>
@@ -142,7 +148,7 @@ const MediaGrid: React.FC<MediaGridProps> = ({
                       variant="outline"
                       size="icon"
                       onClick={(e) => { e.stopPropagation(); goNext(); }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow"
+                      className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow"
                     >
                       <ChevronRight className="h-5 w-5" />
                     </Button>
@@ -150,15 +156,18 @@ const MediaGrid: React.FC<MediaGridProps> = ({
                 )}
               </div>
 
+              {/* Footer */}
+              <div className="px-4 pb-4 pt-2 shrink-0">
               {selectedItem.description && (
-                <p className="text-gray-600 mt-3">{selectedItem.description}</p>
+                <p className="text-gray-600 text-sm">{selectedItem.description}</p>
               )}
               {displayItems.length > 1 && (
-                <p className="text-center text-xs text-gray-400 mt-2">
+                <p className="text-center text-xs text-gray-400 mt-1">
                   {(selectedIndex ?? 0) + 1} / {displayItems.length}
                 </p>
               )}
-            </div>
+              </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
