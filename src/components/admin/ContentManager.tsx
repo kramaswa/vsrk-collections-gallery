@@ -71,7 +71,7 @@ const ContentManager: React.FC = () => {
     const slug = newSection.title.trim().toLowerCase().replace(/\s+/g, '_') || `section_${Date.now()}`;
     const { data, error } = await supabase
       .from('page_content')
-      .insert({ page: activeTab, section: slug, title: newSection.title.trim(), content: newSection.content.trim() })
+      .insert({ page: activeTab, section: slug, title: newSection.title.trim(), content: newSection.content.trim(), sort_order: (pageGroups[activeTab] || []).length + 1 })
       .select()
       .single();
     if (error) {

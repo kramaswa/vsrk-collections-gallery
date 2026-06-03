@@ -20,7 +20,7 @@ const About: React.FC = () => {
       .from('page_content')
       .select('id, section, title, content')
       .eq('page', 'about')
-      .order('created_at')
+      .order('sort_order', { ascending: true, nullsFirst: false })
       .then(({ data }) => { if (data && data.length > 0) setSections(data); });
   }, []);
 
