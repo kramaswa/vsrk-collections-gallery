@@ -66,8 +66,19 @@
 
 @layer components {
   .gallery-grid {
-    @apply grid gap-6;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    columns: 2;
+    column-gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .gallery-grid {
+      columns: 3;
+    }
+  }
+
+  .gallery-grid > * {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
   }
   
   /* Custom border for gold and dark themes */

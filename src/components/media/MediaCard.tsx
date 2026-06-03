@@ -27,7 +27,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
               <img 
                 src={item.media_url} 
                 alt={item.title}
-                className="w-full h-[300px] object-contain bg-gray-50 transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
               />
             ) : (
@@ -35,7 +35,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
                 <img 
                   src={item.thumbnail_url || item.media_url} 
                   alt={item.title}
-                  className="w-full h-[300px] object-contain bg-gray-50 transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
