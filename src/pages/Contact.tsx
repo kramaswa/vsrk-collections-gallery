@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { Instagram } from 'lucide-react';
+import { Instagram, MessageCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { WHATSAPP_NUMBER } from '@/lib/constants';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 
@@ -209,14 +210,27 @@ const Contact: React.FC = () => {
                 
                 <div>
                   <h3 className="font-medium mb-1">Follow Us</h3>
-                  <a 
-                    href={pageContent.instagram_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <a
+                    href={pageContent.instagram_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center text-vsrk-dark hover:text-vsrk-gold transition-colors"
                   >
                     <Instagram className="mr-2" size={20} />
                     {pageContent.instagram}
+                  </a>
+                </div>
+
+                <div>
+                  <h3 className="font-medium mb-1">WhatsApp</h3>
+                  <a
+                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I'm interested in your jewelry collection.")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 rounded-md bg-green-500 hover:bg-green-600 text-white font-medium text-sm transition-colors"
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Chat with us on WhatsApp
                   </a>
                 </div>
               </div>

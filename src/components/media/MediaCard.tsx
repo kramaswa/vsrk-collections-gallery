@@ -4,7 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { MediaItem } from '@/lib/supabase';
 import { Badge } from '@/components/ui/badge';
-import { Tag } from 'lucide-react';
+import { Tag, MessageCircle } from 'lucide-react';
+import { WHATSAPP_NUMBER } from '@/lib/constants';
 
 interface MediaCardProps {
   item: MediaItem;
@@ -85,6 +86,16 @@ const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
                 </Badge>
               </div>
               <p className="text-gray-600 mt-2">{item.description}</p>
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi! I'm interested in: ${item.title} from VSRK Collections`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="mt-4 inline-flex items-center px-4 py-2 rounded-md bg-green-500 hover:bg-green-600 text-white font-medium text-sm transition-colors"
+              >
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Inquire on WhatsApp
+              </a>
             </div>
           </div>
         </DialogContent>
