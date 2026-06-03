@@ -60,7 +60,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
       </Card>
       
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <div className="p-2">
             {item.type === 'image' ? (
               <img 
