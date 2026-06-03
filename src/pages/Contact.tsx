@@ -8,11 +8,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { Instagram, MessageCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { WHATSAPP_NUMBER } from '@/lib/constants';
+import { useWhatsAppNumber } from '@/hooks/useWhatsAppNumber';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 
 const Contact: React.FC = () => {
+  const whatsappNumber = useWhatsAppNumber();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -224,7 +225,7 @@ const Contact: React.FC = () => {
                 <div>
                   <h3 className="font-medium mb-1">WhatsApp</h3>
                   <a
-                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I'm interested in your jewelry collection.")}`}
+                    href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi! I'm interested in your jewelry collection.")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center px-4 py-2 rounded-md bg-green-500 hover:bg-green-600 text-white font-medium text-sm transition-colors"

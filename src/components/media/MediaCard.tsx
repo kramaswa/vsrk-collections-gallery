@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { MediaItem } from '@/lib/supabase';
 import { Badge } from '@/components/ui/badge';
 import { Tag, MessageCircle } from 'lucide-react';
-import { WHATSAPP_NUMBER } from '@/lib/constants';
+import { useWhatsAppNumber } from '@/hooks/useWhatsAppNumber';
 
 interface MediaCardProps {
   item: MediaItem;
@@ -13,6 +13,7 @@ interface MediaCardProps {
 
 const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const whatsappNumber = useWhatsAppNumber();
   
   const handleOpenDialog = () => setIsOpen(true);
   const handleCloseDialog = () => setIsOpen(false);
@@ -87,7 +88,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
               </div>
               <p className="text-gray-600 mt-2">{item.description}</p>
               <a
-                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi! I'm interested in: ${item.title} from VSRK Collections`)}`}
+                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hi! I'm interested in: ${item.title} from VSRK Collections`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}

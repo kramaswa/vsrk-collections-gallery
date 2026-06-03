@@ -9,6 +9,7 @@ import { Loader2, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const CONTACT_FIELDS = [
+  { section: 'whatsapp', label: 'WhatsApp Number (international format, no + or spaces, e.g. 15551234567)', type: 'input', default: '15551234567' },
   { section: 'email', label: 'Email Address', type: 'input', default: 'info@vsrkcollections.com' },
   { section: 'phone', label: 'Phone Number', type: 'input', default: '(555) 123-4567' },
   { section: 'instagram', label: 'Instagram Handle', type: 'input', default: '@vsrk.collections' },
