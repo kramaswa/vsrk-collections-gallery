@@ -48,28 +48,25 @@ const FeaturedSlider: React.FC = () => {
     setRetryCount(prev => prev + 1);
   };
   
-  // If loading, show loader
+  // If loading, show placeholder
   if (isLoading) {
     return (
       <div className="relative w-full h-[600px] overflow-hidden bg-vsrk-light flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto text-white mb-4" />
-          <p className="text-white text-lg">Loading featured items...</p>
-        </div>
+        <p className="text-vsrk-dark text-lg">Loading...</p>
       </div>
     );
   }
-  
+
   // If no featured items, show message with refresh button
   if (featuredItems.length === 0) {
     return (
       <div className="relative w-full h-[600px] overflow-hidden bg-vsrk-light flex items-center justify-center">
         <div className="text-center">
-          <p className="text-white text-xl mb-4">No featured items to display</p>
-          <Button 
-            variant="outline" 
+          <p className="text-vsrk-dark text-xl mb-4">No featured items to display</p>
+          <Button
+            variant="outline"
             onClick={handleManualRefresh}
-            className="text-white border-white hover:bg-white/20 flex items-center gap-2"
+            className="flex items-center gap-2"
           >
             <RefreshCw className="h-4 w-4" />
             Refresh
