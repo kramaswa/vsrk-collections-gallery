@@ -5,7 +5,7 @@ import FeaturedSlider from '@/components/hero/FeaturedSlider';
 import MediaGrid from '@/components/media/MediaGrid';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Instagram } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useMedia } from '@/contexts/MediaContext';
 
 const Index: React.FC = () => {
@@ -36,40 +36,6 @@ const Index: React.FC = () => {
       <div className="w-full overflow-hidden">
         <FeaturedSlider />
       </div>
-      
-      <section className="py-20 px-4">
-        <div className="container mx-auto text-center">
-          <h1 className="font-serif text-4xl md:text-5xl font-medium mb-6">VSRK Collections</h1>
-          <p className="text-gray-700 max-w-2xl mx-auto text-lg mb-8">
-            Curated South Indian jewelry from trusted artisans and vendors across South India. Browse our collection and reach out on WhatsApp to inquire about any piece.
-          </p>
-          
-          <div className="flex justify-center gap-4 flex-wrap">
-            <Button 
-              asChild
-              className="bg-vsrk-gold text-black hover:bg-vsrk-dark hover:text-white"
-            >
-              <Link to="/gallery">
-                Explore Collection <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              asChild
-              className="border-vsrk-gold text-vsrk-dark hover:bg-vsrk-gold/10"
-            >
-              <a 
-                href="https://www.instagram.com/vsrk.collections/?igsh=cGNiZGVmb2R3MGgy" 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <Instagram className="mr-2 h-4 w-4" /> Instagram
-              </a>
-            </Button>
-          </div>
-        </div>
-      </section>
       
       <section className="py-16 px-4 bg-vsrk-cream/50">
         <div className="container mx-auto">

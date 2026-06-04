@@ -2,152 +2,119 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useMedia } from '@/contexts/MediaContext';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, RefreshCw } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, MessageCircle } from 'lucide-react';
+import { useWhatsAppNumber } from '@/hooks/useWhatsAppNumber';
 
 const FeaturedSlider: React.FC = () => {
   const { featuredItems, refreshMedia, isLoading } = useMedia();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [retryCount, setRetryCount] = useState(0);
-  
+  const whatsappNumber = useWhatsAppNumber();
+
   const goToNext = useCallback(() => {
     if (featuredItems.length > 0) {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % featuredItems.length);
+      setCurrentIndex((prev) => (prev + 1) % featuredItems.length);
     }
   }, [featuredItems.length]);
-  
-  const goToPrev = useCallback(() => {
-    if (featuredItems.length > 0) {
-      setCurrentIndex((prevIndex) => (prevIndex - 1 + featuredItems.length) % featuredItems.length);
-    }
-  }, [featuredItems.length]);
-  
-  // Force refresh the media items when component mounts and whenever retry counter changes
+
+  useEffect(() => { refreshMedia(); }, [refreshMedia]);
+
   useEffect(() => {
-    console.log('FeaturedSlider mounted or retry requested, refreshing media items');
-    refreshMedia();
-  }, [refreshMedia, retryCount]);
-  
-  // Reset current index when featured items change
-  useEffect(() => {
-    if (featuredItems.length > 0 && currentIndex >= featuredItems.length) {
-      setCurrentIndex(0);
-    }
-    
-    console.log('Featured items updated in slider:', featuredItems.length);
-  }, [featuredItems, currentIndex]);
-  
-  // Auto-advance the slider every 5 seconds
+    if (featuredItems.length > 0 && currentIndex >= featuredItems.length) setCurrentIndex(0);
+  }, [featuredItems.length, currentIndex]);
+
   useEffect(() => {
     if (featuredItems.length <= 1) return;
-    
     const interval = setInterval(goToNext, 5000);
     return () => clearInterval(interval);
   }, [featuredItems.length, goToNext]);
-  
-  const handleManualRefresh = () => {
-    setRetryCount(prev => prev + 1);
-  };
-  
-  // If loading, show placeholder
+
+  const currentItem = featuredItems[currentIndex] ?? null;
+
   if (isLoading) {
-    return (
-      <div className="relative w-full h-[600px] overflow-hidden bg-vsrk-light flex items-center justify-center">
-        <p className="text-vsrk-dark text-lg">Loading...</p>
-      </div>
-    );
+    return <div className="w-full min-h-[560px] bg-vsrk-light" />;
   }
 
-  // If no featured items, show message with refresh button
-  if (featuredItems.length === 0) {
-    return (
-      <div className="relative w-full h-[600px] overflow-hidden bg-vsrk-light flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-vsrk-dark text-xl mb-4">No featured items to display</p>
-          <Button
-            variant="outline"
-            onClick={handleManualRefresh}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </Button>
-        </div>
-      </div>
-    );
+  if (featuredItems.length === 0 || !currentItem) {
+    return <div className="w-full min-h-[560px] bg-vsrk-light" />;
   }
-  
+
   return (
-    <div className="relative w-full h-[600px] overflow-hidden bg-vsrk-light">
-      {featuredItems.map((item, index) => (
-        <div
-          key={item.id}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-        >
-          {item.type === 'image' ? (
-            <div className="w-full h-full">
-              <img
-                src={item.media_url}
-                alt={item.title}
-                className="w-full h-full object-contain"
-                loading={index === currentIndex ? "eager" : "lazy"}
-                onError={(e) => console.error(`Error loading image: ${item.media_url}`, e)}
-              />
-            </div>
-          ) : (
-            <video
-              src={item.media_url}
-              className="w-full h-full object-contain"
-              autoPlay
-              muted
-              loop
-              playsInline
-              onError={(e) => console.error(`Error loading video: ${item.media_url}`, e)}
-            />
-          )}
-          <div className="absolute bottom-0 left-0 right-0 p-8">
-            <h2 className="font-serif text-2xl sm:text-3xl font-medium text-vsrk-dark drop-shadow-sm">{item.title}</h2>
-          </div>
-        </div>
-      ))}
-      
-      {featuredItems.length > 1 && (
-        <div className="absolute bottom-8 right-8 flex space-x-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full bg-white/20 border-white/40 hover:bg-white/40"
-            onClick={goToPrev}
-          >
-            <ArrowLeft className="h-5 w-5 text-white" />
+    <div className="w-full grid grid-cols-1 md:grid-cols-2 min-h-[560px]">
+      {/* Left — brand text */}
+      <div className="flex flex-col justify-center px-10 md:px-16 py-16 bg-vsrk-light order-2 md:order-1">
+        <p className="text-vsrk-gold text-xs font-semibold tracking-[0.2em] uppercase mb-5">
+          South Indian Jewelry
+        </p>
+        <h1 className="font-serif text-4xl md:text-5xl font-medium text-vsrk-dark leading-tight mb-6">
+          VSRK Collections
+        </h1>
+        <p className="text-gray-600 text-base md:text-lg mb-8 max-w-sm leading-relaxed">
+          Curated from trusted vendors and artisans across South India. Every piece personally handpicked.
+        </p>
+        <div className="flex flex-wrap gap-3 mb-10">
+          <Button asChild className="bg-vsrk-gold text-black hover:bg-vsrk-dark hover:text-white">
+            <Link to="/gallery">
+              Browse Collection <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full bg-white/20 border-white/40 hover:bg-white/40"
-            onClick={goToNext}
-          >
-            <ArrowRight className="h-5 w-5 text-white" />
+          <Button asChild variant="outline" className="border-vsrk-dark text-vsrk-dark hover:bg-vsrk-dark hover:text-white">
+            <a
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hi! I\'m interested in your jewelry collection.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp Us
+            </a>
           </Button>
         </div>
-      )}
-      
-      {featuredItems.length > 1 && (
-        <div className="absolute bottom-8 left-0 right-0">
-          <div className="flex justify-center space-x-2">
-            {featuredItems.map((_, index) => (
+
+        {/* Dot navigation */}
+        {featuredItems.length > 1 && (
+          <div className="flex gap-2">
+            {featuredItems.map((_, i) => (
               <button
-                key={index}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  index === currentIndex ? 'bg-white w-4' : 'bg-white/50'
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === currentIndex ? 'w-6 bg-vsrk-gold' : 'w-1.5 bg-vsrk-dark/30'
                 }`}
-                onClick={() => setCurrentIndex(index)}
               />
             ))}
           </div>
+        )}
+      </div>
+
+      {/* Right — jewelry image */}
+      <div className="relative bg-vsrk-light flex items-center justify-center order-1 md:order-2 min-h-[340px] md:min-h-0 overflow-hidden">
+        {featuredItems.map((item, index) => (
+          <div
+            key={item.id}
+            className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ${
+              index === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+          >
+            {item.type === 'image' ? (
+              <img
+                src={item.media_url}
+                alt={item.title}
+                className="w-full h-full object-contain p-6"
+                loading={index === currentIndex ? 'eager' : 'lazy'}
+              />
+            ) : (
+              <video
+                src={item.media_url}
+                className="w-full h-full object-contain p-6"
+                autoPlay muted loop playsInline
+              />
+            )}
+          </div>
+        ))}
+        {/* Item name */}
+        <div className="absolute bottom-4 left-0 right-0 text-center">
+          <p className="font-serif text-vsrk-dark/70 text-sm">{currentItem.title}</p>
         </div>
-      )}
+      </div>
     </div>
   );
 };
