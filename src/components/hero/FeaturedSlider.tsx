@@ -92,20 +92,19 @@ const FeaturedSlider: React.FC = () => {
           }`}
         >
           {item.type === 'image' ? (
-            <div className="w-full h-full flex items-center justify-center">
+            <div className="w-full h-full">
               {!isImageLoaded && index === currentIndex && (
-                <Loader2 className="h-8 w-8 animate-spin text-white absolute z-10" />
+                <Loader2 className="h-8 w-8 animate-spin text-white absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
               )}
               <img
                 src={item.media_url}
                 alt={item.title}
-                className="w-full h-full object-contain"
-                style={{ objectFit: 'contain', maxHeight: '100%', maxWidth: '100%' }}
+                className="w-full h-full object-cover object-top"
                 loading={index === currentIndex ? "eager" : "lazy"}
                 onLoad={() => setIsImageLoaded(true)}
                 onError={(e) => {
                   console.error(`Error loading image: ${item.media_url}`, e);
-                  setIsImageLoaded(true); // Still set as loaded to avoid indefinite loading
+                  setIsImageLoaded(true);
                 }}
               />
             </div>

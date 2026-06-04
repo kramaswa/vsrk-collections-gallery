@@ -41,7 +41,7 @@ const Index: React.FC = () => {
         <div className="container mx-auto text-center">
           <h1 className="font-serif text-4xl md:text-5xl font-medium mb-6">VSRK Collections</h1>
           <p className="text-gray-700 max-w-2xl mx-auto text-lg mb-8">
-            Exquisite handcrafted jewelry for every occasion. Each piece is designed with passion and created with precision to enhance your natural beauty.
+            Curated South Indian jewelry from trusted artisans and vendors across South India. Browse our collection and reach out on WhatsApp to inquire about any piece.
           </p>
           
           <div className="flex justify-center gap-4 flex-wrap">
@@ -94,12 +94,12 @@ const Index: React.FC = () => {
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-serif text-3xl mb-6">Handcrafted With Love</h2>
+            <h2 className="font-serif text-3xl mb-6">Personally Curated, Just for You</h2>
             <p className="text-gray-700 mb-8">
-              Each piece in our collection is meticulously handcrafted using traditional techniques and the finest materials. Our designs draw inspiration from both contemporary trends and timeless classics, resulting in jewelry that is both modern and enduring.
+              We have close relationships with vendors and artisans across South India, so you get access to quality pieces that are hard to find abroad. Every item in our gallery has been personally handpicked. If it's here, it's because we love it.
             </p>
             <Link to="/about" className="text-vsrk-gold hover:text-vsrk-dark font-medium inline-flex items-center">
-              Learn more about our process <ArrowRight className="ml-1 h-4 w-4" />
+              Learn more about us <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </div>
         </div>
