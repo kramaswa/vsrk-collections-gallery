@@ -2,25 +2,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useMedia } from '@/contexts/MediaContext';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Loader2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RefreshCw } from 'lucide-react';
 
 const FeaturedSlider: React.FC = () => {
   const { featuredItems, refreshMedia, isLoading } = useMedia();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   
   const goToNext = useCallback(() => {
     if (featuredItems.length > 0) {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % featuredItems.length);
-      setIsImageLoaded(false); // Reset image loaded state for new slide
     }
   }, [featuredItems.length]);
   
   const goToPrev = useCallback(() => {
     if (featuredItems.length > 0) {
       setCurrentIndex((prevIndex) => (prevIndex - 1 + featuredItems.length) % featuredItems.length);
-      setIsImageLoaded(false); // Reset image loaded state for new slide
     }
   }, [featuredItems.length]);
   
@@ -93,19 +90,12 @@ const FeaturedSlider: React.FC = () => {
         >
           {item.type === 'image' ? (
             <div className="w-full h-full">
-              {!isImageLoaded && index === currentIndex && (
-                <Loader2 className="h-8 w-8 animate-spin text-white absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-              )}
               <img
                 src={item.media_url}
                 alt={item.title}
                 className="w-full h-full object-contain"
                 loading={index === currentIndex ? "eager" : "lazy"}
-                onLoad={() => setIsImageLoaded(true)}
-                onError={(e) => {
-                  console.error(`Error loading image: ${item.media_url}`, e);
-                  setIsImageLoaded(true);
-                }}
+                onError={(e) => console.error(`Error loading image: ${item.media_url}`, e)}
               />
             </div>
           ) : (
