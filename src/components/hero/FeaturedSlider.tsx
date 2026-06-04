@@ -54,7 +54,7 @@ const FeaturedSlider: React.FC = () => {
   // If loading, show loader
   if (isLoading) {
     return (
-      <div className="relative w-full h-[600px] overflow-hidden bg-black flex items-center justify-center">
+      <div className="relative w-full h-[600px] overflow-hidden bg-vsrk-light flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin mx-auto text-white mb-4" />
           <p className="text-white text-lg">Loading featured items...</p>
@@ -66,7 +66,7 @@ const FeaturedSlider: React.FC = () => {
   // If no featured items, show message with refresh button
   if (featuredItems.length === 0) {
     return (
-      <div className="relative w-full h-[600px] overflow-hidden bg-black flex items-center justify-center">
+      <div className="relative w-full h-[600px] overflow-hidden bg-vsrk-light flex items-center justify-center">
         <div className="text-center">
           <p className="text-white text-xl mb-4">No featured items to display</p>
           <Button 
@@ -83,7 +83,7 @@ const FeaturedSlider: React.FC = () => {
   }
   
   return (
-    <div className="relative w-full h-[600px] overflow-hidden bg-black">
+    <div className="relative w-full h-[600px] overflow-hidden bg-vsrk-light">
       {featuredItems.map((item, index) => (
         <div
           key={item.id}
@@ -99,7 +99,7 @@ const FeaturedSlider: React.FC = () => {
               <img
                 src={item.media_url}
                 alt={item.title}
-                className="w-full h-full object-cover object-top"
+                className="w-full h-full object-contain"
                 loading={index === currentIndex ? "eager" : "lazy"}
                 onLoad={() => setIsImageLoaded(true)}
                 onError={(e) => {
@@ -119,10 +119,8 @@ const FeaturedSlider: React.FC = () => {
               onError={(e) => console.error(`Error loading video: ${item.media_url}`, e)}
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-            <h2 className="font-serif text-3xl sm:text-4xl mb-2">{item.title}</h2>
-            <p className="text-lg mb-6 max-w-md">{item.description}</p>
+          <div className="absolute bottom-0 left-0 right-0 p-8">
+            <h2 className="font-serif text-2xl sm:text-3xl font-medium text-vsrk-dark drop-shadow-sm">{item.title}</h2>
           </div>
         </div>
       ))}
