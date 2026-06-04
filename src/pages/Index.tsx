@@ -33,7 +33,7 @@ const Index: React.FC = () => {
 
   return (
     <Layout>
-      <div className="w-full overflow-hidden">
+      <div className="w-full overflow-hidden -mt-24">
         <FeaturedSlider />
       </div>
       
