@@ -53,30 +53,24 @@ const Navbar: React.FC = () => {
           </a>
         </nav>
 
-        {/* Mobile Menu */}
-        {isMobile && (
-          <div className={cn(
-            "fixed inset-0 bg-white bg-opacity-95 z-50 transition-transform transform",
-            isOpen ? "translate-x-0" : "translate-x-full"
-          )}>
-            <div className="container mx-auto px-4 pt-20 pb-8 h-full">
-              <nav className="flex flex-col space-y-8 items-center text-xl">
-                <Link to="/" className="font-medium text-vsrk-dark hover:text-vsrk-gold transition duration-200" onClick={closeMenu}>Home</Link>
-                <Link to="/gallery" className="font-medium text-vsrk-dark hover:text-vsrk-gold transition duration-200" onClick={closeMenu}>Gallery</Link>
-                <Link to="/about" className="font-medium text-vsrk-dark hover:text-vsrk-gold transition duration-200" onClick={closeMenu}>About</Link>
-                <Link to="/contact" className="font-medium text-vsrk-dark hover:text-vsrk-gold transition duration-200" onClick={closeMenu}>Contact</Link>
-                <a 
-                  href="https://www.instagram.com/vsrk.collections/?igsh=cGNiZGVmb2R3MGgy" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="flex items-center space-x-2 text-vsrk-dark hover:text-vsrk-gold transition-colors"
-                  onClick={closeMenu}
-                >
-                  <Instagram size={24} />
-                  <span>Instagram</span>
-                </a>
-              </nav>
-            </div>
+        {/* Mobile Menu — dropdown below navbar */}
+        {isMobile && isOpen && (
+          <div className="absolute top-full left-0 right-0 bg-vsrk-light border-t border-vsrk-gold/20 shadow-lg z-50">
+            <nav className="flex flex-col divide-y divide-vsrk-gold/10">
+              <Link to="/" className="px-6 py-4 font-medium text-vsrk-dark hover:text-vsrk-gold hover:bg-vsrk-gold/5 transition-colors" onClick={closeMenu}>Home</Link>
+              <Link to="/gallery" className="px-6 py-4 font-medium text-vsrk-dark hover:text-vsrk-gold hover:bg-vsrk-gold/5 transition-colors" onClick={closeMenu}>Gallery</Link>
+              <Link to="/about" className="px-6 py-4 font-medium text-vsrk-dark hover:text-vsrk-gold hover:bg-vsrk-gold/5 transition-colors" onClick={closeMenu}>About</Link>
+              <Link to="/contact" className="px-6 py-4 font-medium text-vsrk-dark hover:text-vsrk-gold hover:bg-vsrk-gold/5 transition-colors" onClick={closeMenu}>Contact</Link>
+              <a
+                href="https://www.instagram.com/vsrk.collections/?igsh=cGNiZGVmb2R3MGgy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-4 flex items-center gap-2 font-medium text-vsrk-dark hover:text-vsrk-gold hover:bg-vsrk-gold/5 transition-colors"
+                onClick={closeMenu}
+              >
+                <Instagram size={18} /> Instagram
+              </a>
+            </nav>
           </div>
         )}
       </div>
