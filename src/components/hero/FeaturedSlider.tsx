@@ -29,38 +29,64 @@ const FeaturedSlider: React.FC = () => {
     return () => clearInterval(interval);
   }, [featuredItems.length, goToNext]);
 
-  const currentItem = featuredItems[currentIndex] ?? null;
-
-  if (isLoading) {
-    return <div className="w-full min-h-[560px] bg-vsrk-light" />;
-  }
-
-  if (featuredItems.length === 0 || !currentItem) {
-    return <div className="w-full min-h-[560px] bg-vsrk-light" />;
+  if (isLoading || featuredItems.length === 0) {
+    return <div className="w-full h-[480px] bg-vsrk-dark" />;
   }
 
   return (
-    <div className="w-full grid grid-cols-1 md:grid-cols-2 h-auto md:h-[85vh] md:max-h-[680px]">
-      {/* Left — brand text */}
-      <div className="flex flex-col justify-center px-10 md:px-16 py-12 bg-vsrk-light order-2 md:order-1">
-        <p className="text-vsrk-gold text-xs font-semibold tracking-[0.2em] uppercase mb-5">
+    <div className="relative w-full h-[480px] overflow-hidden">
+      {/* Images */}
+      {featuredItems.map((item, index) => (
+        <div
+          key={item.id}
+          className={`absolute inset-0 transition-opacity duration-1000 ${
+            index === currentIndex ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          {item.type === 'image' ? (
+            <img
+              src={item.media_url}
+              alt={item.title}
+              className="w-full h-full object-cover object-center"
+              loading={index === currentIndex ? 'eager' : 'lazy'}
+            />
+          ) : (
+            <video
+              src={item.media_url}
+              className="w-full h-full object-cover object-center"
+              autoPlay muted loop playsInline
+            />
+          )}
+        </div>
+      ))}
+
+      {/* Dark gradient overlay — bottom heavy so text is readable */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+
+      {/* Centered text content */}
+      <div className="absolute inset-0 flex flex-col items-center justify-end pb-16 px-6 text-center">
+        <p className="text-vsrk-gold text-xs font-semibold tracking-[0.25em] uppercase mb-3">
           South Indian Jewelry
         </p>
-        <h1 className="font-serif text-4xl md:text-5xl font-medium text-vsrk-dark leading-tight mb-5">
+        <h1 className="font-serif text-4xl md:text-5xl font-medium text-white mb-4 drop-shadow-lg">
           VSRK Collections
         </h1>
-        <p className="text-gray-600 text-base md:text-lg mb-8 max-w-sm leading-relaxed">
-          Curated from trusted vendors and artisans across South India. Every piece personally handpicked.
+        <p className="text-white/80 text-base md:text-lg mb-8 max-w-lg">
+          Curated from trusted vendors across South India. Every piece personally handpicked.
         </p>
-        <div className="flex flex-wrap gap-3 mb-10">
-          <Button asChild className="bg-vsrk-gold text-black hover:bg-vsrk-dark hover:text-white">
+        <div className="flex flex-wrap justify-center gap-3">
+          <Button asChild className="bg-vsrk-gold text-black hover:bg-white hover:text-black font-medium">
             <Link to="/gallery">
               Browse Collection <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
-          <Button asChild variant="outline" className="border-vsrk-dark text-vsrk-dark hover:bg-vsrk-dark hover:text-white">
+          <Button
+            asChild
+            variant="outline"
+            className="border-white text-white hover:bg-white hover:text-black font-medium"
+          >
             <a
-              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hi! I\'m interested in your jewelry collection.')}`}
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hi! I'm interested in your jewelry collection.")}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -68,50 +94,22 @@ const FeaturedSlider: React.FC = () => {
             </a>
           </Button>
         </div>
-        {featuredItems.length > 1 && (
-          <div className="flex gap-2">
-            {featuredItems.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentIndex(i)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === currentIndex ? 'w-6 bg-vsrk-gold' : 'w-1.5 bg-vsrk-dark/30'
-                }`}
-              />
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* Right — jewelry image, fills full height */}
-      <div className="relative bg-vsrk-light order-1 md:order-2 h-72 md:h-full overflow-hidden">
-        {featuredItems.map((item, index) => (
-          <div
-            key={item.id}
-            className={`absolute inset-0 transition-opacity duration-700 ${
-              index === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
-          >
-            {item.type === 'image' ? (
-              <img
-                src={item.media_url}
-                alt={item.title}
-                className="w-full h-full object-contain p-4"
-                loading={index === currentIndex ? 'eager' : 'lazy'}
-              />
-            ) : (
-              <video
-                src={item.media_url}
-                className="w-full h-full object-contain p-4"
-                autoPlay muted loop playsInline
-              />
-            )}
-          </div>
-        ))}
-        <div className="absolute bottom-3 left-0 right-0 text-center">
-          <p className="font-serif text-vsrk-dark/60 text-xs">{currentItem.title}</p>
+      {/* Dot navigation */}
+      {featuredItems.length > 1 && (
+        <div className="absolute bottom-5 left-0 right-0 flex justify-center gap-2">
+          {featuredItems.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentIndex(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === currentIndex ? 'w-6 bg-vsrk-gold' : 'w-1.5 bg-white/50'
+              }`}
+            />
+          ))}
         </div>
-      </div>
+      )}
     </div>
   );
 };
