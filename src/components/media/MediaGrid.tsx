@@ -116,7 +116,7 @@ const MediaGrid: React.FC<MediaGridProps> = ({
                   className="inline-flex items-center px-3 py-2 rounded-md bg-green-500 hover:bg-green-600 text-white font-medium text-sm transition-colors shrink-0 ml-2"
                 >
                   <MessageCircle className="mr-2 h-4 w-4" />
-                  Inquire on WhatsApp
+                  <span className="hidden sm:inline">Inquire on WhatsApp</span>
                 </a>
               </div>
 
@@ -157,15 +157,15 @@ const MediaGrid: React.FC<MediaGridProps> = ({
               </div>
 
               {/* Footer */}
-              <div className="px-4 pb-4 pt-2 shrink-0">
-              {selectedItem.description && (
-                <p className="text-gray-600 text-sm">{selectedItem.description}</p>
-              )}
-              {displayItems.length > 1 && (
-                <p className="text-center text-xs text-gray-400 mt-1">
-                  {(selectedIndex ?? 0) + 1} / {displayItems.length}
-                </p>
-              )}
+              <div className="px-4 pb-4 pt-2 shrink-0 max-h-24 overflow-y-auto">
+                {selectedItem.description && (
+                  <p className="text-gray-600 text-sm">{selectedItem.description}</p>
+                )}
+                {displayItems.length > 1 && (
+                  <p className="text-center text-xs text-gray-400 mt-1">
+                    {(selectedIndex ?? 0) + 1} / {displayItems.length}
+                  </p>
+                )}
               </div>
             </>
           )}
