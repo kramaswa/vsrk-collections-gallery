@@ -40,13 +40,13 @@ const FeaturedSlider: React.FC = () => {
   }
 
   return (
-    <div className="w-full grid grid-cols-1 md:grid-cols-2 min-h-[560px]">
+    <div className="w-full flex flex-col md:flex-row h-[85vh] max-h-[680px] min-h-[500px]">
       {/* Left — brand text */}
-      <div className="flex flex-col justify-center px-10 md:px-16 py-16 bg-vsrk-light order-2 md:order-1">
+      <div className="flex flex-col justify-center px-10 md:px-16 py-12 bg-vsrk-light w-full md:w-1/2 order-2 md:order-1">
         <p className="text-vsrk-gold text-xs font-semibold tracking-[0.2em] uppercase mb-5">
           South Indian Jewelry
         </p>
-        <h1 className="font-serif text-4xl md:text-5xl font-medium text-vsrk-dark leading-tight mb-6">
+        <h1 className="font-serif text-4xl md:text-5xl font-medium text-vsrk-dark leading-tight mb-5">
           VSRK Collections
         </h1>
         <p className="text-gray-600 text-base md:text-lg mb-8 max-w-sm leading-relaxed">
@@ -68,8 +68,6 @@ const FeaturedSlider: React.FC = () => {
             </a>
           </Button>
         </div>
-
-        {/* Dot navigation */}
         {featuredItems.length > 1 && (
           <div className="flex gap-2">
             {featuredItems.map((_, i) => (
@@ -85,12 +83,12 @@ const FeaturedSlider: React.FC = () => {
         )}
       </div>
 
-      {/* Right — jewelry image */}
-      <div className="relative bg-vsrk-light flex items-center justify-center order-1 md:order-2 min-h-[340px] md:min-h-0 overflow-hidden">
+      {/* Right — jewelry image, fills full height */}
+      <div className="relative bg-vsrk-light w-full md:w-1/2 order-1 md:order-2 h-64 md:h-full overflow-hidden">
         {featuredItems.map((item, index) => (
           <div
             key={item.id}
-            className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ${
+            className={`absolute inset-0 transition-opacity duration-700 ${
               index === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
           >
@@ -98,21 +96,20 @@ const FeaturedSlider: React.FC = () => {
               <img
                 src={item.media_url}
                 alt={item.title}
-                className="w-full h-full object-contain p-6"
+                className="w-full h-full object-contain p-4"
                 loading={index === currentIndex ? 'eager' : 'lazy'}
               />
             ) : (
               <video
                 src={item.media_url}
-                className="w-full h-full object-contain p-6"
+                className="w-full h-full object-contain p-4"
                 autoPlay muted loop playsInline
               />
             )}
           </div>
         ))}
-        {/* Item name */}
-        <div className="absolute bottom-4 left-0 right-0 text-center">
-          <p className="font-serif text-vsrk-dark/70 text-sm">{currentItem.title}</p>
+        <div className="absolute bottom-3 left-0 right-0 text-center">
+          <p className="font-serif text-vsrk-dark/60 text-xs">{currentItem.title}</p>
         </div>
       </div>
     </div>
