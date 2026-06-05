@@ -40,9 +40,9 @@ const FeaturedSlider: React.FC = () => {
   }
 
   return (
-    <div className="w-full flex flex-col md:flex-row h-[85vh] max-h-[680px] min-h-[500px]">
+    <div className="w-full grid grid-cols-1 md:grid-cols-2 h-auto md:h-[85vh] md:max-h-[680px]">
       {/* Left — brand text */}
-      <div className="flex flex-col justify-center px-10 md:px-16 py-12 bg-vsrk-light w-full md:w-1/2 order-2 md:order-1">
+      <div className="flex flex-col justify-center px-10 md:px-16 py-12 bg-vsrk-light order-2 md:order-1">
         <p className="text-vsrk-gold text-xs font-semibold tracking-[0.2em] uppercase mb-5">
           South Indian Jewelry
         </p>
@@ -84,7 +84,7 @@ const FeaturedSlider: React.FC = () => {
       </div>
 
       {/* Right — jewelry image, fills full height */}
-      <div className="relative bg-vsrk-light w-full md:w-1/2 order-1 md:order-2 h-64 md:h-full overflow-hidden">
+      <div className="relative bg-vsrk-light order-1 md:order-2 h-72 md:h-full overflow-hidden">
         {featuredItems.map((item, index) => (
           <div
             key={item.id}
